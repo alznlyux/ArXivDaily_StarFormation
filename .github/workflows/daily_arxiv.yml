@@ -1,7 +1,7 @@
 # name of workflow
 name: Run Arxiv Papers Daily
 
-# Controls when the workflow will run
+# Controls when the workflow will run 
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
