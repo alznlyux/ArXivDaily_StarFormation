@@ -13,7 +13,9 @@ env:
   GITHUB_USER_NAME: 773763165 # your github id
   GITHUB_USER_EMAIL: 773763165@qq.com # your email address
   
-  
+permissions:
+  contents: write
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
