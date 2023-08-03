@@ -50,8 +50,14 @@ def main(args):
         for keyword in keyword_list:
             if keyword.lower() in paper['abstract'].lower():
                 inclu=1
+        for keyword in keyword_list:
+            if keyword.lower() in paper['title'].lower():
+                inclu=1
         for keyword_ex in keyword_ex_list:
             if (keyword_ex.lower() in paper['abstract'].lower())==1:
+                inclu=0
+        for keyword_ex in keyword_ex_list:
+            if (keyword_ex.lower() in paper['title'].lower())==1:
                 inclu=0
         if inclu==1: 
             keyword_dict.append(paper)
