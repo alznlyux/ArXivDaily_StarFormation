@@ -13,14 +13,7 @@ Keyword list: ['star formation', 'molecular cloud', 'interstellar medium', 'clou
 Excluded: ['galaxies', 'galaxy cluster', 'AGN']
 
 
-### Today: 30papers 
-#### AGN STORM 2: V. Anomalous Behavior of the CIV Light Curve in Mrk 817
- - **Authors:** Y. Homayouni, Gerard A. Kriss, Gisella De Rosa, Rachel Plesha, Edward M. Cackett, Michael R. Goad, Kirk T. Korista, Keith Horne, Travis Fischer, Tim Waters, Aaron J. Barth, Erin A. Kara, Hermine Landt, Nahum Arav, Benjamin D. Boizelle, Misty C. Bentz, Michael S. Brotherton, Doron Chelouche, Elena Dalla Bonta, Maryam Dehghanian, Pu Du, Gary J. Ferland, Carina Fian, Jonathan Gelbord, Catherine J. Grier, Patrick B. Hall, Chen Hu, Dragana Ilic, Michael D. Joner, Jelle Kaastra, Shai Kaspi, Andjelka B. Kovacevic, Daniel Kynoch, Yan-Rong Li, Missagh Mehdipour, Jake A. Miller, Jake Mitchell, John Montano, Hagai Netzer, Ethan Partington, Luka C. Popovic, Daniel Proga, Thaisa Storchi-Bergmann, David Sanmartim, Matthew R. Siebert, Tommaso Treu, Marianne Vestergaard, Jian-Min Wang, Martin J. Ward, Fatima Zaidouni,  et al. (1 additional author not shown)
- - **Subjects:** Astrophysics of Galaxies (astro-ph.GA)
- - **Arxiv link:** https://arxiv.org/abs/2308.00742
- - **Pdf link:** https://arxiv.org/pdf/2308.00742
- - **Abstract**
- An intensive reverberation mapping campaign on the Seyfert 1 galaxy Mrk817 using the Cosmic Origins Spectrograph (COS) on the Hubble Space Telescope (HST) revealed significant variations in the response of the broad UV emission lines to fluctuations in the continuum emission. The response of the prominent UV emission lines changes over a $\sim$60-day duration, resulting in distinctly different time lags in the various segments of the light curve over the 14 months observing campaign. One-dimensional echo-mapping models fit these variations if a slowly varying background is included for each emission line. These variations are more evident in the CIV light curve, which is the line least affected by intrinsic absorption in Mrk817 and least blended with neighboring emission lines. We identify five temporal windows with distinct emission line response, and measure their corresponding time delays, which range from 2 to 13 days. These temporal windows are plausibly linked to changes in the UV and X-ray obscuration occurring during these same intervals. The shortest time lags occur during periods with diminishing obscuration, whereas the longest lags occur during periods with rising obscuration. We propose that the obscuring outflow shields the ultraviolet broad lines from the ionizing continuum. The resulting change in the spectral energy distribution of the ionizing continuum, as seen by clouds at a range of distances from the nucleus, is responsible for the changes in the line response.
+### Today: 29papers 
 #### A statistical framework for recovering intensity mapping  autocorrelations from crosscorrelations
  - **Authors:** Lisa McBride, Adrian Liu
  - **Subjects:** Cosmology and Nongalactic Astrophysics (astro-ph.CO); Instrumentation and Methods for Astrophysics (astro-ph.IM)
