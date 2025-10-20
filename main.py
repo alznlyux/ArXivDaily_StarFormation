@@ -100,8 +100,8 @@ def main(args):
         report = '#### {}\n - **Authors:** {}\n - **Subjects:** {}\n - **Arxiv link:** {}\n - **Pdf link:** {}\n - **Abstract**\n {}' \
                 .format(paper['title'], paper['authors'], paper['subjects'],
                         paper['abstract'])
-        line1 = f"- **Arxiv link:** [{paper['main_page']}]({paper['main_page']})\n")
-        line2 = f"- **Pdf link:** [{paper['pdf']}]({paper['pdf']})\n")
+        line1 = f"- **Arxiv link:** [{paper['main_page']}]({paper['main_page']})\n"
+        line2 = f"- **Pdf link:** [{paper['pdf']}]({paper['pdf']})\n"
         abs = '- **Abstract**\n {}'.format(paper['abstract'])
 
         full_report = full_report + report + line1 + line2 + abs + '\n'
