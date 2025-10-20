@@ -116,42 +116,95 @@ def main(args):
     import smtplib, ssl
     from email.message import EmailMessage
     
-    def send_email_smtp(subject, html_body, plain_body):
+    # def send_email_smtp(subject, html_body, plain_body):
+    #     host = os.environ.get("SMTP_HOST")
+    #     port = int(os.environ.get("SMTP_PORT", "465"))
+    #     user = os.environ.get("SMTP_USERNAME")
+    #     pwd  = os.environ.get("SMTP_PASSWORD")
+    #     sender = os.environ.get("SMTP_FROM")
+    #     to = [x.strip() for x in os.environ.get("EMAIL_TO","").split(",") if x.strip()]
+    
+    #     if not (host and user and pwd and sender and to):
+    #         print("[WARN] SMTP not configured; skip email.")
+    #         return
+    
+    #     msg = EmailMessage()
+    #     msg["Subject"] = subject
+    #     msg["From"] = sender
+    #     msg["To"] = ", ".join(to)
+    #     msg.set_content(plain_body)
+    #     msg.add_alternative(f"<!doctype html><html><body>{html_body}</body></html>", subtype="html")
+    
+    #     # 465(SSL) 如 163 邮箱；587(STARTTLS) 如 Gmail
+    #     if port == 465:
+    #         with smtplib.SMTP_SSL(host, port, context=ssl.create_default_context()) as s:
+    #             s.login(user, pwd)
+    #             s.send_message(msg)
+    #     else:
+    #         with smtplib.SMTP(host, port) as s:
+    #             s.ehlo()
+    #             s.starttls(context=ssl.create_default_context())
+    #             s.login(user, pwd)
+    #             s.send_message(msg)
+
+    # subject = issue_title  # 比如 "Showing new listings for Monday, 20 October 2025"
+    # html_body = full_report.replace("\n","<br>")
+    # plain_body = full_report
+    # send_email_smtp(subject, html_body, plain_body)
+
+    import os, smtplib, ssl, pathlib, re
+    from email.message import EmailMessage
+    import markdown  # pip install markdown
+    
+    def send_email_with_md(md_path: str, subject_hint: str = None):
+        if not md_path or not os.path.exists(md_path):
+            print("[WARN] markdown not found:", md_path)
+            return
+    
+        text = pathlib.Path(md_path).read_text(encoding="utf-8")
+        # Markdown -> HTML
+        html_body = markdown.markdown(text, extensions=["extra", "nl2br", "sane_lists", "toc"])
+        html_tpl = f"""<!doctype html><html><head><meta charset="utf-8">
+        <style>
+          body {{ font:14px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial; color:#111 }}
+          a {{ text-decoration:none }}
+          code, pre {{ font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace }}
+          pre {{ background:#f6f8fa; padding:12px; border-radius:8px; overflow:auto }}
+        </style></head><body>{html_body}</body></html>"""
+    
+        # 主题：优先用 md 首个二/三级标题
+        m = re.search(r'^\s*#{2,3}\s*(.+)$', text, flags=re.M)
+        subject = subject_hint or (m.group(1).strip() if m else f"arXiv Daily · {os.path.basename(md_path)}")
+    
         host = os.environ.get("SMTP_HOST")
         port = int(os.environ.get("SMTP_PORT", "465"))
         user = os.environ.get("SMTP_USERNAME")
         pwd  = os.environ.get("SMTP_PASSWORD")
         sender = os.environ.get("SMTP_FROM")
-        to = [x.strip() for x in os.environ.get("EMAIL_TO","").split(",") if x.strip()]
-    
-        if not (host and user and pwd and sender and to):
-            print("[WARN] SMTP not configured; skip email.")
-            return
+        to = os.environ.get("EMAIL_TO")
+        if not all([host, port, user, pwd, sender, to]):
+            print("[WARN] SMTP not configured; skip email."); return
     
         msg = EmailMessage()
         msg["Subject"] = subject
         msg["From"] = sender
-        msg["To"] = ", ".join(to)
-        msg.set_content(plain_body)
-        msg.add_alternative(f"<!doctype html><html><body>{html_body}</body></html>", subtype="html")
+        msg["To"] = to
+        msg.set_content(text)                 # 纯文本备份
+        msg.add_alternative(html_tpl, subtype="html")  # HTML 正文
     
-        # 465(SSL) 如 163 邮箱；587(STARTTLS) 如 Gmail
         if port == 465:
             with smtplib.SMTP_SSL(host, port, context=ssl.create_default_context()) as s:
-                s.login(user, pwd)
-                s.send_message(msg)
+                s.login(user, pwd); s.send_message(msg)
         else:
             with smtplib.SMTP(host, port) as s:
-                s.ehlo()
-                s.starttls(context=ssl.create_default_context())
-                s.login(user, pwd)
-                s.send_message(msg)
+                s.ehlo(); s.starttls(context=ssl.create_default_context()); s.login(user, pwd); s.send_message(msg)
+    
+        print("[OK] Mail sent to", to)
 
-    subject = issue_title  # 比如 "Showing new listings for Monday, 20 October 2025"
-    html_body = full_report.replace("\n","<br>")
-    plain_body = full_report
-    send_email_smtp(subject, html_body, plain_body)
-
+    import glob
+    md_files = sorted(glob.glob("Arxiv_Daily_Notice/*.md"), key=os.path.getmtime, reverse=True)
+    md_path = md_files[0] if md_files else "README.md"
+    send_email_with_md(md_path, subject_hint=issue_title if 'issue_title' in globals() else None)
 
     print("end")
 
