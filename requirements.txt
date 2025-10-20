@@ -1,3 +1,4 @@
 beautifulsoup4==4.6.3
 requests==2.19.1
 markdown>=3.6
+pymdown-extensions>=10.8
