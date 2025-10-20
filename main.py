@@ -112,6 +112,40 @@ def main(args):
 
     make_github_issue(title=issue_title, body=full_report,labels=keyword_list, 
     TOKEN=os.environ['TOKEN'])
+    import smtplib, ssl
+    from email.message import EmailMessage
+    
+    def send_email_smtp(subject, html_body, plain_body):
+        host = os.environ.get("SMTP_HOST")
+        port = int(os.environ.get("SMTP_PORT", "465"))
+        user = os.environ.get("SMTP_USERNAME")
+        pwd  = os.environ.get("SMTP_PASSWORD")
+        sender = os.environ.get("SMTP_FROM")
+        to = [x.strip() for x in os.environ.get("EMAIL_TO","").split(",") if x.strip()]
+    
+        if not (host and user and pwd and sender and to):
+            print("[WARN] SMTP not configured; skip email.")
+            return
+    
+        msg = EmailMessage()
+        msg["Subject"] = subject
+        msg["From"] = sender
+        msg["To"] = ", ".join(to)
+        msg.set_content(plain_body)
+        msg.add_alternative(f"<!doctype html><html><body>{html_body}</body></html>", subtype="html")
+    
+        # 465(SSL) 如 163 邮箱；587(STARTTLS) 如 Gmail
+        if port == 465:
+            with smtplib.SMTP_SSL(host, port, context=ssl.create_default_context()) as s:
+                s.login(user, pwd)
+                s.send_message(msg)
+        else:
+            with smtplib.SMTP(host, port) as s:
+                s.ehlo()
+                s.starttls(context=ssl.create_default_context())
+                s.login(user, pwd)
+                s.send_message(msg)
+
     print("end")
 
 if __name__ == '__main__':
