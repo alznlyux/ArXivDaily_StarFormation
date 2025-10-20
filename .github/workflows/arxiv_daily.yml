@@ -8,10 +8,14 @@ on:
   schedule:
     - cron:  "0 2 * * mon-fri"  # Runs every day in 12
 env:
-
   TOKEN: ${{ secrets.ISSUE_TOKEN }}
-  GITHUB_USER_NAME: 773763165 # your github id
-  GITHUB_USER_EMAIL: 773763165@qq.com # your email address
+  SMTP_HOST: ${{ secrets.SMTP_HOST }}
+  SMTP_PORT: ${{ secrets.SMTP_PORT }}   # 163用465；Gmail用587
+  SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  SMTP_FROM: ${{ secrets.SMTP_FROM }}   # 发件地址
+  EMAIL_TO: ${{ secrets.EMAIL_TO }}     # 多个收件人用逗号分隔
+
   
 permissions:
   contents: write
