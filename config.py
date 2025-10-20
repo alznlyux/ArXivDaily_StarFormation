@@ -17,4 +17,4 @@ NEW_SUB_URL = 'https://arxiv.org/list/astro-ph/new'
 # Keywords to search
 KEYWORD_LIST = ["star formation", "molecular cloud", "interstellar medium", "cloud", "clump", "core", "filament", "atomic gas", "N-PDF", "bubble", "shell", "HI"]
 # Keywords to exclude
-KEYWORD_EX_LIST = ["galaxies", "galaxy cluster", "AGN"]
+KEYWORD_EX_LIST = ["galaxies", "AGN", "black hole", "planet", "fast radio burst", "z~"]
