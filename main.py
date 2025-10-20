@@ -45,6 +45,11 @@ def main(args):
             "\n", "").strip()
         paper['subjects'] = dd_list[i].find("div", {"class": "list-subjects"}).text.replace("Subjects: ", "").strip()
         paper['abstract'] = dd_list[i].find("p", {"class": "mathjax"}).text.replace("\n", " ").strip()
+
+        subjects = paper['subjects']
+        if not ("astro-ph.GA" in subjects or "astro-ph.SR" in subjects):
+            continue
+
                         
         inclu=0
         for keyword in keyword_list:
