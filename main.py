@@ -5,7 +5,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
-import os
+import os, smtplib, ssl, pathlib, re
+from email.message import EmailMessage
+import markdown
+import glob
 
 from bs4 import BeautifulSoup as bs
 import urllib.request
@@ -152,9 +155,7 @@ def main(args):
     # plain_body = full_report
     # send_email_smtp(subject, html_body, plain_body)
 
-    import os, smtplib, ssl, pathlib, re
-    from email.message import EmailMessage
-    import markdown  # pip install markdown
+    
     
     def send_email_with_md(md_path: str, subject_hint: str = None):
         if not md_path or not os.path.exists(md_path):
@@ -201,7 +202,6 @@ def main(args):
     
         print("[OK] Mail sent to", to)
 
-    import glob
     md_files = sorted(glob.glob("Arxiv_Daily_Notice/*.md"), key=os.path.getmtime, reverse=True)
     md_path = md_files[0] if md_files else "README.md"
     send_email_with_md(md_path, subject_hint=issue_title if 'issue_title' in globals() else None)
