@@ -8,7 +8,7 @@ import argparse
 import os, smtplib, ssl, pathlib, re
 from email.message import EmailMessage
 import markdown
-import pymdown-extensions as pymdownx
+# import pymdown-extensions as pymdownx
 import glob
 import os, re, datetime as _dt
 
