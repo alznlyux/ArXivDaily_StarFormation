@@ -112,6 +112,7 @@ def main(args):
 
     make_github_issue(title=issue_title, body=full_report,labels=keyword_list, 
     TOKEN=os.environ['TOKEN'])
+    
     import smtplib, ssl
     from email.message import EmailMessage
     
@@ -145,6 +146,12 @@ def main(args):
                 s.starttls(context=ssl.create_default_context())
                 s.login(user, pwd)
                 s.send_message(msg)
+
+    subject = issue_title  # 比如 "Showing new listings for Monday, 20 October 2025"
+    html_body = full_report.replace("\n","<br>")
+    plain_body = full_report
+    send_email_smtp(subject, html_body, plain_body)
+
 
     print("end")
 
