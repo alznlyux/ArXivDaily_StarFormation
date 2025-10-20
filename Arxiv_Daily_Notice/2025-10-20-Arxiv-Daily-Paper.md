@@ -10,7 +10,7 @@ See `Usage.md` for instructions on how to personalize the repo.
 Keyword list: ['star formation', 'molecular cloud', 'interstellar medium', 'dust', 'cloud', 'clump', 'core', 'filament', 'atomic gas', 'H$_2$', 'HI', 'N-PDF', 'bubble', 'shell', 'feedback', 'jet', 'outflow', 'protostar']
 
 
-Excluded: ['galaxies', 'galaxy clusters', 'AGN', 'black hole', 'dark matter', 'dark energy', 'fast radio burst', ' z ']
+Excluded: ['galaxies', 'galaxy clusters', 'AGN', 'black hole', 'lensing', 'dark matter', 'dark energy', 'fast radio burst', 'pulsar', 'neutron star', 'white dwarf', 'AGB', ' z ', 'lightcurve']
 
 
 ### Today: 9papers 
