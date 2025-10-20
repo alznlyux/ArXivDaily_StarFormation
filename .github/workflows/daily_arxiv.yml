@@ -23,7 +23,8 @@ jobs:
 
       - name: Install deps
         run: |
-          pip install -r requirements.txt
+          pip install -r requirements.txt'
+          pip install markdown
 
       - name: Run scraper & build report
         env:
@@ -58,3 +59,77 @@ jobs:
             git commit -m "Update arXiv daily $(date -u +'%Y-%m-%dT%H:%MZ')"
             git push
           fi
+      - name: Send email via SMTP (Markdown → HTML)
+        env:
+          SMTP_HOST:     ${{ secrets.SMTP_HOST }}
+          SMTP_PORT:     ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM:     ${{ secrets.SMTP_FROM }}
+          EMAIL_TO:      ${{ secrets.EMAIL_TO }}
+          LATEST_MD:     ${{ env.LATEST_MD }}
+        run: |
+          python - <<'PY'
+          import os, smtplib, ssl, pathlib, sys, re
+          from email.message import EmailMessage
+          import markdown  # pip-installed in previous step
+      
+          md_path = os.environ.get("LATEST_MD") or "README.md"
+          if not os.path.exists(md_path):
+              print("[ERROR] Markdown not found:", md_path); sys.exit(0)  # 不让整条流水线失败
+      
+          text = pathlib.Path(md_path).read_text(encoding="utf-8")
+      
+          # 1) Markdown 转 HTML（支持表格/粗体/列表/代码块）
+          html_body = markdown.markdown(
+              text,
+              extensions=["extra", "nl2br", "sane_lists", "toc"]
+          )
+      
+          # 2) 简单套一个干净的 HTML 外壳，方便邮件客户端渲染
+          html_tpl = f"""<!doctype html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body {{ font: 14px/1.5 -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial; color:#111; }}
+              a {{ text-decoration:none; }}
+              code, pre {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }}
+              pre {{ background:#f6f8fa; padding:12px; border-radius:8px; overflow:auto; }}
+              h1,h2,h3 {{ margin-top:1.2em; }}
+              ul,ol {{ padding-left: 1.2em; }}
+            </style>
+          </head>
+          <body>
+            {html_body}
+          </body>
+          </html>"""
+      
+          # 3) 取一个更合适的标题（找第一行 “### Today: …”；找不到就用文件名）
+          m = re.search(r'^\s*#{2,3}\s*(.+)$', text, flags=re.M)
+          subject = f"[arXiv Daily] {m.group(1).strip()}" if m else f"[arXiv Daily] {os.path.basename(md_path)}"
+      
+          # 4) 组装并发送
+          host = os.environ.get("SMTP_HOST"); port = int(os.environ.get("SMTP_PORT","465"))
+          user = os.environ.get("SMTP_USERNAME"); pwd  = os.environ.get("SMTP_PASSWORD")
+          sender = os.environ.get("SMTP_FROM");     to   = os.environ.get("EMAIL_TO")
+          if not all([host, port, user, pwd, sender, to]):
+              print("[WARN] SMTP not configured; skip email."); sys.exit(0)
+      
+          msg = EmailMessage()
+          msg["Subject"] = subject
+          msg["From"] = sender
+          msg["To"] = to
+          msg.set_content(text)                        # 纯文本备份（少数客户端用）
+          msg.add_alternative(html_tpl, subtype="html")# HTML 正文（含可点链接）
+      
+          if port == 465:
+              with smtplib.SMTP_SSL(host, port, context=ssl.create_default_context()) as s:
+                  s.login(user, pwd); s.send_message(msg)
+          else:
+              with smtplib.SMTP(host, port) as s:
+                  s.ehlo(); s.starttls(context=ssl.create_default_context()); s.login(user, pwd); s.send_message(msg)
+      
+          print("[OK] HTML mail sent to", to)
+          PY
+      
