@@ -24,7 +24,6 @@ jobs:
       - name: Install deps
         run: |
           pip install -r requirements.txt
-          pip install markdown
 
       - name: Run scraper & build report
         env:
@@ -43,7 +42,7 @@ jobs:
           INCLUDES: ${{ vars.INCLUDES }}       # 例如 "H2,outflow,protostar"
           EXCLUDES: ${{ vars.EXCLUDES }}       # 例如 "AGN,galaxy"
         run: |
-          python main.py -t "$TOKEN"
+          python main.py -t "${{ secrets.ISSUE_TOKEN }}"
 
       - name: Commit & push updates
         if: always()   # 即便前面步骤成功/失败，这一步也能优雅收尾
