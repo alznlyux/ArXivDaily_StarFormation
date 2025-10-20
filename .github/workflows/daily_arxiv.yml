@@ -2,8 +2,8 @@ name: arXiv Daily (GA/SR + Email)
 
 on:
   schedule:
-    # 每天 UTC 00:10 运行（JST 09:10）
-    - cron: '10 0 * * *'
+    # 每周一到周五，北京 09:00（UTC 01:00）
+    - cron: '0 1 * * 1-5'
   workflow_dispatch: {}   # 支持 Actions 页面手动触发
 
 jobs:
