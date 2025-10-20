@@ -1,64 +1,54 @@
-# name of workflow
-name: Run Arxiv Papers Daily
+name: arXiv Daily (GA/SR + Email)
 
-# Controls when the workflow will run 
 on:
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
   schedule:
-    - cron:  "0 1 * * mon-fri"  # Runs every day in 12
-env:
-  TOKEN: ${{ secrets.ISSUE_TOKEN }}
-  SMTP_HOST: ${{ secrets.SMTP_HOST }}
-  SMTP_PORT: ${{ secrets.SMTP_PORT }}   # 163用465；Gmail用587
-  SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
-  SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-  SMTP_FROM: ${{ secrets.SMTP_FROM }}   # 发件地址
-  EMAIL_TO: ${{ secrets.EMAIL_TO }}     # 多个收件人用逗号分隔
+    # 每天 UTC 00:10 运行（JST 09:10）
+    - cron: '10 0 * * *'
+  workflow_dispatch: {}   # 支持 Actions 页面手动触发
 
-  
-permissions:
-  contents: write
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    name: update
-    # The type of runner that the job will run on
+  run:
     runs-on: ubuntu-latest
-    
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    permissions:
+      contents: write     # 允许把生成的 README/Markdown 回推仓库
+      issues: write       # 允许创建/更新 Issue
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.5.2
-        
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v4.6.0
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.8        
+          python-version: '3.11'
 
-      #- name: Setup Node.js environment
-      #  uses: actions/setup-node@v2.5.2
-
-      - name: Install dependencies
+      - name: Install deps
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install -r requirements.txt
-          
-      - name: Run daily arxiv 
+          pip install -r requirements.txt
+
+      - name: Run scraper & build report
         env:
-          GITHUB: ${{ secrets.GITHUB }}
-        run: TOKEN=${{ secrets.ISSUE_TOKEN }} python main.py --token=TOKEN
-      
-      # ============================================
-      # TODO [√] 更新仓库数据
-      # ============================================
-      - name: Setup GIT user
-        uses: fregante/setup-git-user@v2.0.1
+          # 供 main.py 使用的 Token（你已有创建 Issue 的逻辑）
+          TOKEN: ${{ secrets.ISSUE_TOKEN }}
 
-      - name: Push done work
+          # 邮件相关（按你用的邮箱来）
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+
+          # （可选）关键词也能用变量覆盖，没设就走 config.py 里的默认
+          INCLUDES: ${{ vars.INCLUDES }}       # 例如 "H2,outflow,protostar"
+          EXCLUDES: ${{ vars.EXCLUDES }}       # 例如 "AGN,galaxy"
         run: |
-          git add --all
-          git commit -m "Automated deployment"
-          git push --force origin main
+          python main.py
+
+      - name: Commit & push changes
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Update arXiv daily $(date -u +'%Y-%m-%dT%H:%MZ')" || echo "No changes"
+          git push
