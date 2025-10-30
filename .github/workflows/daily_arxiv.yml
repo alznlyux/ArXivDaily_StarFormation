@@ -28,8 +28,8 @@ jobs:
       - name: Run scraper & build report
         env:
           # 供 main.py 使用的 Token（你已有创建 Issue 的逻辑）
-          # TOKEN: ${{ secrets.ISSUE_TOKEN }}
-          GH_TOKEN: ${{ github.token }}
+          TOKEN: ${{ secrets.ISSUE_TOKEN }}
+          # GH_TOKEN: ${{ github.token }}
           # 邮件相关（按你用的邮箱来）
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
@@ -42,8 +42,8 @@ jobs:
           INCLUDES: ${{ vars.INCLUDES }}       # 例如 "H2,outflow,protostar"
           EXCLUDES: ${{ vars.EXCLUDES }}       # 例如 "AGN,galaxy"
         run: |
-          # python main.py -t "${{ secrets.ISSUE_TOKEN }}"
-          python main.py -t "$GH_TOKEN"
+          python main.py -t "${{ secrets.ISSUE_TOKEN }}"
+          # python main.py -t "$GH_TOKEN"
 
       - name: Commit & push updates
         if: always()   # 即便前面步骤成功/失败，这一步也能优雅收尾
