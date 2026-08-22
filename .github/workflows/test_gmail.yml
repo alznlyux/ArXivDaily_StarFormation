@@ -1,0 +1,39 @@
+name: Test Gmail SMTP
+
+on:
+  push:
+    branches:
+      - test/gmail-smtp
+
+jobs:
+  test-mail:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send test email
+        env:
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: |
+          python - <<'PY'
+          import os, smtplib, ssl
+          from email.message import EmailMessage
+
+          pwd = os.environ.get('GMAIL_APP_PASSWORD')
+          to = os.environ.get('EMAIL_TO')
+          if not pwd:
+              raise RuntimeError('Missing repository secret: GMAIL_APP_PASSWORD')
+          if not to:
+              raise RuntimeError('Missing repository secret: EMAIL_TO')
+
+          msg = EmailMessage()
+          msg['Subject'] = 'ArXivDaily Gmail SMTP test'
+          msg['From'] = 'ismlyux@gmail.com'
+          msg['To'] = to
+          msg.set_content('This is a test email from alznlyux/ArXivDaily_StarFormation GitHub Actions. Gmail SMTP authentication succeeded.')
+
+          with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=ssl.create_default_context()) as smtp:
+              smtp.login('ismlyux@gmail.com', pwd)
+              smtp.send_message(msg)
+
+          print('[OK] Gmail SMTP test email sent to', to)
+          PY
