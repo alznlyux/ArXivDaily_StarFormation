@@ -4,48 +4,59 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import json
 import requests
 from config import USERNAME, REPO_OWNER, REPO_NAME
 
-def make_github_issue(title, body=None, assignee=USERNAME, closed=False, labels=[], TOKEN="TOKEN_needed"):
-    # Create an issue on github.com using the given parameters
-    # Url to create issues via POST
-    url = 'https://api.github.com/repos/%s/%s/import/issues' % (REPO_OWNER, REPO_NAME)
 
-    # Headers
+def make_github_issue(title, body=None, assignee=USERNAME, closed=False, labels=None, TOKEN="TOKEN_needed"):
+    """Create a GitHub issue using the standard Issues API.
+
+    The workflow passes GitHub Actions' built-in GITHUB_TOKEN, so no personal
+    access token needs to be stored or rotated for this repository.
+    """
+    url = "https://api.github.com/repos/{}/{}/issues".format(REPO_OWNER, REPO_NAME)
     headers = {
-        "Authorization": "token %s" % TOKEN,
-        "Accept": "application/vnd.github.golden-comet-preview+json"
+        "Authorization": "Bearer {}".format(TOKEN),
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
     }
 
-    # Create our issue
-    data = {'issue': {'title': title,
-                      'body': body,
-                      'assignee': assignee,
-                      'closed': closed,
-                      'labels': labels}}
+    data = {
+        "title": title,
+        "body": body or "",
+    }
+    if assignee:
+        data["assignees"] = [assignee]
+    if labels:
+        data["labels"] = labels
 
-    payload = json.dumps(data)
+    response = requests.post(url, json=data, headers=headers, timeout=30)
 
-    # Add the issue to our repository
-    response = requests.request("POST", url, data=payload, headers=headers)
-    if response.status_code == 202:
-        print ('Successfully created Issue "%s"' % title)
+    # Some historical keyword labels may not exist in the repository. If GitHub
+    # rejects metadata, retry once with only title/body so issue creation does
+    # not block the daily email.
+    if response.status_code == 422 and ("labels" in data or "assignees" in data):
+        response = requests.post(
+            url,
+            json={"title": title, "body": body or ""},
+            headers=headers,
+            timeout=30,
+        )
+
+    if response.status_code == 201:
+        print('Successfully created Issue "{}"'.format(title))
         print(response.status_code)
     else:
-        print ('Could not create Issue "%s"' % title)
-        print ('Response:', response.content)
+        print('Could not create Issue "{}"'.format(title))
+        print("Response:", response.text)
         print(response.status_code)
 
 
 if __name__ == '__main__':
-    title = 'Pretty title'
-    body = 'Beautiful body'
-    assignee = USERNAME
-    closed = False
-    labels = [
-        "imagenet", "image retrieval"
-    ]
-
-    make_github_issue(title, body, assignee, closed, labels)
+    make_github_issue(
+        title='Pretty title',
+        body='Beautiful body',
+        assignee=USERNAME,
+        closed=False,
+        labels=["imagenet", "image retrieval"],
+    )

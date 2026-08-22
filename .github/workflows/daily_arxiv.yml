@@ -4,14 +4,15 @@ on:
   schedule:
     # 每周一到周五，北京 09:00（UTC 01:00）
     - cron: '0 1 * * 1-5'
-  workflow_dispatch: {}   # 支持 Actions 页面手动触发
+  workflow_dispatch: {}
 
 jobs:
   run:
     runs-on: ubuntu-latest
     permissions:
-      contents: write     # 允许把生成的 README/Markdown 回推仓库
-      issues: write       # 允许创建/更新 Issue
+      contents: write
+      issues: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,41 +23,36 @@ jobs:
           python-version: '3.11'
 
       - name: Install deps
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
-      - name: Run scraper & build report
+      - name: Run scraper, build report & send email
         env:
-          # 供 main.py 使用的 Token（你已有创建 Issue 的逻辑）
-          TOKEN: ${{ secrets.ISSUE_TOKEN }}
-          # GH_TOKEN: ${{ github.token }}
-          # 邮件相关（按你用的邮箱来）
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          # GitHub Actions 自动提供的短期 token，无需维护个人 PAT
+          TOKEN: ${{ github.token }}
+
+          # Gmail SMTP：仅 App Password 需要放到 Secret
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PORT: '465'
+          SMTP_USERNAME: ismlyux@gmail.com
+          SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          SMTP_FROM: ismlyux@gmail.com
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
 
-          # （可选）关键词也能用变量覆盖，没设就走 config.py 里的默认
-          INCLUDES: ${{ vars.INCLUDES }}       # 例如 "H2,outflow,protostar"
-          EXCLUDES: ${{ vars.EXCLUDES }}       # 例如 "AGN,galaxy"
-        run: |
-          python main.py -t "${{ secrets.ISSUE_TOKEN }}"
-          # python main.py -t "$GH_TOKEN"
+          # 可选：关键词覆盖；未设置时继续使用 config.py 默认值
+          INCLUDES: ${{ vars.INCLUDES }}
+          EXCLUDES: ${{ vars.EXCLUDES }}
+        run: python main.py -t "${{ github.token }}"
 
       - name: Commit & push updates
-        if: always()   # 即便前面步骤成功/失败，这一步也能优雅收尾
+        if: always()
         run: |
           set -e
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          # 若没有任何 staged 改动，就别 commit（避免 exit 1）
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
             git commit -m "Update arXiv daily $(date -u +'%Y-%m-%dT%H:%MZ')"
             git push
           fi
-    
