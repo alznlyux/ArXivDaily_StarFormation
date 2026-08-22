@@ -1,0 +1,44 @@
+{
+  "topics": {
+    "atomic_ism": {
+      "description": "Cold and warm atomic interstellar gas in the Milky Way and nearby star-forming environments, including H I 21 cm emission and absorption, HISA, HINSA, CNM and WNM, and the atomic-to-molecular transition.",
+      "lexical_terms": ["H I", "HI 21 cm", "21 cm", "21-cm", "neutral hydrogen", "atomic hydrogen", "atomic gas", "HISA", "HINSA", "CNM", "WNM", "atomic-to-molecular"]
+    },
+    "molecular_clouds": {
+      "description": "Molecular clouds and molecular gas: cloud formation, structure, evolution, kinematics, CO and other molecular-line observations, dense gas, filaments, clumps, and cores.",
+      "lexical_terms": ["molecular cloud", "molecular gas", "GMC", "CO", "13CO", "C18O", "dense gas", "filament", "clump", "dense core", "cloud structure"]
+    },
+    "star_formation": {
+      "description": "Star formation from cloud to core and young stellar object, including gravitational collapse, protostars, protostellar envelopes, accretion, clusters, and the interaction between young stars and their natal clouds.",
+      "lexical_terms": ["star formation", "young stellar object", "YSO", "protostar", "protostellar", "collapse", "accretion", "natal cloud", "prestellar"]
+    },
+    "feedback_bubbles": {
+      "description": "Stellar feedback in the interstellar medium, including H II regions, ionized bubbles and cavities, shells, stellar winds, supernova feedback, expanding structures, triggered star formation, and interactions with molecular clouds.",
+      "lexical_terms": ["feedback", "H II region", "HII region", "bubble", "shell", "ionization front", "stellar wind", "supernova", "triggered star formation", "expanding"]
+    },
+    "turbulence": {
+      "description": "Turbulence and gas dynamics in the interstellar medium and molecular clouds, including velocity statistics, power spectra, structure functions, linewidths, density and column-density PDFs, and turbulent driving.",
+      "lexical_terms": ["turbulence", "turbulent", "velocity dispersion", "velocity statistics", "power spectrum", "structure function", "linewidth", "density PDF", "column density PDF", "N-PDF"]
+    },
+    "magnetic_fields": {
+      "description": "Magnetic fields in the interstellar medium and star-forming clouds, including polarization, Zeeman measurements, MHD, magnetic support, field morphology, and the role of magnetic fields in cloud and core evolution.",
+      "lexical_terms": ["magnetic field", "polarization", "Zeeman", "MHD", "magnetized", "Alfven", "magnetic support"]
+    },
+    "astrochemistry": {
+      "description": "Astrochemistry and molecular tracers in interstellar and star-forming gas, including chemical evolution, abundances, deuteration, ionization, cosmic-ray chemistry, and diagnostic molecular species.",
+      "lexical_terms": ["astrochemistry", "chemical evolution", "molecular abundance", "deuteration", "ionization", "cosmic ray ionization", "molecular tracer", "chemical network"]
+    },
+    "massive_star_formation": {
+      "description": "Massive star and cluster formation in dense molecular environments, including infrared dark clouds, massive clumps, high-mass protostars, hot cores, massive young stellar objects, and clustered star formation.",
+      "lexical_terms": ["IRDC", "infrared dark cloud", "massive clump", "high-mass star", "massive star formation", "hot core", "massive protostar", "clustered star formation"]
+    },
+    "galactic_ism_surveys": {
+      "description": "Galactic interstellar medium on large scales, including Milky Way gas and dust surveys, Galactic structure, H I and molecular-line surveys, three-dimensional dust and gas mapping, and new observational datasets useful for ISM science.",
+      "lexical_terms": ["Milky Way", "Galactic plane", "ISM survey", "H I survey", "CO survey", "3D dust", "dust map", "gas survey", "Galactic structure"]
+    },
+    "ism_methods_data": {
+      "description": "Observational, statistical, computational, and radiative-transfer methods directly applicable to interstellar-medium and star-formation research, including spectral decomposition, tomography, map reconstruction, line analysis, and new surveys or instruments.",
+      "lexical_terms": ["spectral decomposition", "radiative transfer", "tomography", "map reconstruction", "line profile", "Gaussian decomposition", "survey", "telescope", "instrumentation"]
+    }
+  }
+}
