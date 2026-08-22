@@ -40,17 +40,17 @@ jobs:
       - name: Install experiment dependencies
         run: pip install -r v2/requirements-v2.txt
 
-      - name: Run contrastive SPECTER2 v2.1 experiment
-        id: contrastive
+      - name: Run domain-gated SPECTER2 v2.2 experiment
+        id: domain_gated
         continue-on-error: true
         env:
           DAYS: ${{ inputs.days || '10' }}
         run: |
           mkdir -p v2_results
           set +e
-          python v2/v2_contrastive.py --days "$DAYS" --output-dir v2_results 2>&1 | tee v2_results/contrastive-run.log
+          python v2/v2_domain_gated.py --days "$DAYS" --output-dir v2_results 2>&1 | tee v2_results/domain-gated-run.log
           status=${PIPESTATUS[0]}
-          echo "$status" > v2_results/contrastive-exit-code.txt
+          echo "$status" > v2_results/domain-gated-exit-code.txt
           exit "$status"
 
       - name: Commit experiment results and diagnostics
@@ -62,10 +62,10 @@ jobs:
           if git diff --cached --quiet; then
             echo "No experiment output changes."
           else
-            git commit -m "Update v2.1 contrastive recommender experiment"
+            git commit -m "Update v2.2 domain-gated recommender experiment"
             git push
           fi
 
-      - name: Fail job if contrastive experiment failed
-        if: steps.contrastive.outcome == 'failure'
+      - name: Fail job if domain-gated experiment failed
+        if: steps.domain_gated.outcome == 'failure'
         run: exit 1
