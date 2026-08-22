@@ -43,8 +43,8 @@
   },
   "negative_topics": {
     "solar_physics": {
-      "description": "Solar physics focused on the Sun, solar flares, coronal heating, solar wind, sunspots, helioseismology, or Solar Orbiter instrumentation, without a direct interstellar-medium or star-formation objective.",
-      "lexical_terms": ["solar flare", "Solar Orbiter", "solar corona", "sunspot", "helioseismology", "GOES", "solar wind"]
+      "description": "Solar physics focused on the Sun, solar flares, coronal heating, solar atmosphere, solar wind, sunspots, helioseismology, or Solar Orbiter instrumentation, without a direct interstellar-medium or star-formation objective.",
+      "lexical_terms": ["solar flare", "Solar Orbiter", "solar corona", "coronal heating", "solar atmosphere", "sunspot", "helioseismology", "GOES", "solar wind"]
     },
     "stellar_atmospheres_evolution": {
       "description": "Individual-star physics such as stellar atmospheres, photospheres, stellar interiors, stellar evolution, evolved stars, red giants, red supergiants, AGB stars, stellar rotation, or mass loss when the ISM is only background context.",
@@ -57,6 +57,18 @@
     "compact_objects_transients": {
       "description": "Compact-object and transient astrophysics focused on black holes, neutron stars, pulsars, X-ray binaries, gamma-ray bursts, accretion disks, relativistic jets, gravitational waves, or neutrino transients rather than the ISM.",
       "lexical_terms": ["black hole", "neutron star", "pulsar", "X-ray binary", "gamma-ray burst", "accretion disk", "gravitational wave", "relativistic jet"]
+    },
+    "relativistic_plasma_transients": {
+      "description": "Relativistic or collisionless plasma physics and explosive-transient dynamics, including particle-in-cell simulations, collisionless shocks, relativistic shear flows, tidal disruption events, fast blue optical transients, particle acceleration, and high-energy plasma processes not centered on the ISM.",
+      "lexical_terms": ["collisionless shock", "particle-in-cell", "electron-positron plasma", "relativistic plasma", "tidal disruption event", "fast blue optical transient", "particle acceleration", "relativistic shear"]
+    },
+    "generic_mhd_plasma_theory": {
+      "description": "Generic magnetohydrodynamic, plasma, dynamo, or shear-flow theory applicable to many astrophysical or laboratory systems but not specifically focused on interstellar gas, molecular clouds, or star formation.",
+      "lexical_terms": ["laboratory plasma", "mean-field dynamo", "shear-flow", "plasma instability", "dynamo theory", "relativistic MHD"]
+    },
+    "dense_nuclear_matter": {
+      "description": "Dense nuclear and quark matter, neutron-star equations of state, phase transitions in compact stars, hadronic matter, and particle or nuclear physics cross-lists without an interstellar-medium science objective.",
+      "lexical_terms": ["quark matter", "equation of state", "hadronic matter", "hybrid star", "neutron star merger", "QCD phase"]
     },
     "galaxy_evolution_agn": {
       "description": "Extragalactic galaxy evolution, AGN, galaxy populations, galaxy-scale metallicity calibration, cosmological simulations, or high-redshift galaxy spectroscopy where the main goal is galaxy evolution rather than the physics of the interstellar medium itself.",
