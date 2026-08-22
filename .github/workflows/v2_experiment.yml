@@ -40,19 +40,19 @@ jobs:
       - name: Install experiment dependencies
         run: pip install -r v2/requirements-v2.txt
 
-      - name: Run keyword vs BM25 vs SPECTER2 experiment
+      - name: Run contrastive SPECTER2 v2.1 experiment
         env:
           DAYS: ${{ inputs.days || '10' }}
-        run: python v2/v2_experiment.py --days "$DAYS" --output-dir v2_results
+        run: python v2/v2_contrastive.py --days "$DAYS" --output-dir v2_results
 
       - name: Commit experiment results
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add v2_results/
+          git add -- v2_results/
           if git diff --cached --quiet; then
             echo "No experiment output changes."
           else
-            git commit -m "Update v2 literature recommender experiment"
+            git commit -m "Update v2.1 contrastive recommender experiment"
             git push
           fi
