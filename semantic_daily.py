@@ -9,104 +9,110 @@ import pathlib
 import re
 import smtplib
 import ssl
+import xml.etree.ElementTree as ET
 from email.message import EmailMessage
 
 import markdown
 import requests
-from bs4 import BeautifulSoup
 
-from config import NEW_SUB_URL
 from github_issue import make_github_issue
 from semantic_recommender import score_papers
 
 
-def _extract_categories(subjects: str) -> list[str]:
-    """Extract arXiv category codes from the parenthesized subject labels."""
-    categories = []
-    for value in re.findall(r"\(([^()]+)\)", subjects):
-        value = value.strip()
-        if re.fullmatch(r"[A-Za-z0-9.-]+", value):
-            categories.append(value)
-    return categories
+ARXIV_API = "https://export.arxiv.org/api/query"
+ATOM = "{http://www.w3.org/2005/Atom}"
+ARXIV = "{http://arxiv.org/schemas/atom}"
 
 
-def _daily_submission_lists(content) -> list:
-    """Return New submissions + Cross-lists, explicitly excluding Replacements.
-
-    arXiv's /new page is sectioned into multiple <dl> blocks. The legacy code
-    read only the first block; semantic production keeps the new-submission and
-    cross-list blocks so relevant HE/IM/other-primary papers are not silently
-    missed. If arXiv changes headings, fall back conservatively to the first dl.
-    """
-    selected = []
-    for dl in content.find_all("dl"):
-        heading = dl.find_previous("h3")
-        heading_text = heading.get_text(" ", strip=True).lower() if heading else ""
-        if "new submission" in heading_text or "cross-list" in heading_text or "cross list" in heading_text:
-            selected.append(dl)
-    if not selected and content.dl is not None:
-        selected = [content.dl]
-    return selected
+def _clean(text: str) -> str:
+    return re.sub(r"\s+", " ", text or "").strip()
 
 
-def fetch_daily_papers() -> tuple[str, list[dict]]:
-    """Read new + cross-listed astro-ph papers without keyword prefiltering."""
-    headers = {"User-Agent": "ArXivDaily-ISM/2.0 (+https://github.com/alznlyux/ArXivDaily_StarFormation)"}
-    response = requests.get(NEW_SUB_URL, headers=headers, timeout=120)
+def _fetch_arxiv_day(day: dt.date) -> list[dict]:
+    """Fetch every paper carrying an astro-ph category for one UTC calendar day."""
+    stamp = day.strftime("%Y%m%d")
+    query = f"cat:astro-ph.* AND submittedDate:[{stamp}0000 TO {stamp}2359]"
+    params = {
+        "search_query": query,
+        "start": 0,
+        "max_results": 2000,
+        "sortBy": "submittedDate",
+        "sortOrder": "descending",
+    }
+    headers = {
+        "User-Agent": "ArXivDaily-ISM/2.1 (+https://github.com/alznlyux/ArXivDaily_StarFormation)"
+    }
+    response = requests.get(ARXIV_API, params=params, headers=headers, timeout=120)
     response.raise_for_status()
-    soup = BeautifulSoup(response.text, "html.parser")
-    content = soup.body.find("div", {"id": "content"})
-    if content is None or content.find("h3") is None or content.dl is None:
-        raise RuntimeError("Could not parse the arXiv new-list page")
+    root = ET.fromstring(response.content)
 
-    issue_title = content.find("h3").get_text(" ", strip=True)
-    listing_dls = _daily_submission_lists(content)
     papers = []
-    seen_ids = set()
+    seen = set()
+    for entry in root.findall(f"{ATOM}entry"):
+        raw_id = _clean(entry.findtext(f"{ATOM}id", default=""))
+        paper_id = raw_id.rsplit("/", 1)[-1]
+        paper_id = re.sub(r"v\d+$", "", paper_id)
+        if not paper_id or paper_id in seen:
+            continue
+        seen.add(paper_id)
 
-    for dl in listing_dls:
-        dt_list = dl.find_all("dt")
-        dd_list = dl.find_all("dd")
-        if len(dt_list) != len(dd_list):
-            raise RuntimeError("arXiv listing dt/dd lengths differ")
+        title = _clean(entry.findtext(f"{ATOM}title", default=""))
+        abstract = _clean(entry.findtext(f"{ATOM}summary", default=""))
+        authors = [
+            _clean(author.findtext(f"{ATOM}name", default=""))
+            for author in entry.findall(f"{ATOM}author")
+        ]
+        categories = [
+            node.attrib.get("term", "")
+            for node in entry.findall(f"{ATOM}category")
+            if node.attrib.get("term", "")
+        ]
+        primary_node = entry.find(f"{ARXIV}primary_category")
+        primary = primary_node.attrib.get("term", "") if primary_node is not None else ""
 
-        for dtnode, ddnode in zip(dt_list, dd_list):
-            a_abs = dtnode.find("a", title="Abstract")
-            title_node = ddnode.find("div", {"class": "list-title mathjax"})
-            authors_node = ddnode.find("div", {"class": "list-authors"})
-            subjects_node = ddnode.find("div", {"class": "list-subjects"})
-            abstract_node = ddnode.find("p", {"class": "mathjax"})
-            if not all([a_abs, title_node, authors_node, subjects_node, abstract_node]):
-                continue
+        if not any(cat.startswith("astro-ph.") for cat in categories):
+            continue
 
-            paper_id = a_abs["href"].rstrip("/").split("/")[-1]
-            if paper_id in seen_ids:
-                continue
-            seen_ids.add(paper_id)
+        papers.append({
+            "id": paper_id,
+            "title": title,
+            "authors": authors,
+            "subjects": "; ".join(categories),
+            "categories": categories,
+            "primary_category": primary,
+            "abstract": abstract,
+            "main_page": f"https://arxiv.org/abs/{paper_id}",
+            "pdf": f"https://arxiv.org/pdf/{paper_id}.pdf",
+        })
+    return papers
 
-            title = title_node.get_text(" ", strip=True).replace("Title:", "", 1).strip()
-            authors_text = authors_node.get_text(" ", strip=True).replace("Authors:", "", 1).strip()
-            subjects = subjects_node.get_text(" ", strip=True).replace("Subjects:", "", 1).strip()
-            abstract = re.sub(r"\s+", " ", abstract_node.get_text(" ", strip=True)).strip()
-            categories = _extract_categories(subjects)
-            astro_categories = [c for c in categories if c.startswith("astro-ph.")]
-            primary = categories[0] if categories else (astro_categories[0] if astro_categories else "")
 
-            papers.append({
-                "id": paper_id,
-                "title": title,
-                "authors": [x.strip() for x in authors_text.split(",") if x.strip()],
-                "subjects": subjects,
-                "categories": categories,
-                "primary_category": primary,
-                "abstract": abstract,
-                "main_page": f"https://arxiv.org/abs/{paper_id}",
-                "pdf": f"https://arxiv.org/pdf/{paper_id}.pdf",
-            })
-    if not papers:
-        raise RuntimeError("No papers parsed from astro-ph/new")
-    print(f"[INFO] Parsed {len(papers)} new/cross-listed papers from astro-ph/new")
-    return issue_title, papers
+def fetch_daily_papers(max_lookback_days: int = 7) -> tuple[str, list[dict]]:
+    """Return the most recent calendar day that has astro-ph submissions.
+
+    The official Atom API is used instead of scraping /list/astro-ph/new.  A
+    category query naturally includes astro-ph cross-lists, while revisions are
+    not duplicated as separate list-page replacement entries.
+    """
+    today = dt.datetime.utcnow().date()
+    last_error = None
+    for offset in range(max_lookback_days + 1):
+        day = today - dt.timedelta(days=offset)
+        try:
+            papers = _fetch_arxiv_day(day)
+        except Exception as exc:
+            last_error = exc
+            print(f"[WARN] arXiv API failed for {day}: {exc}")
+            continue
+        if papers:
+            issue_title = f"Latest astro-ph submissions for {day.isoformat()}"
+            print(f"[INFO] Retrieved {len(papers)} astro-ph papers for {day}")
+            return issue_title, papers
+        print(f"[INFO] No astro-ph submissions for {day}; checking previous day")
+
+    if last_error is not None:
+        raise RuntimeError(f"No recent astro-ph day could be retrieved; last API error: {last_error}")
+    raise RuntimeError("No astro-ph submissions found in the lookback window")
 
 
 def _true_galactic_ism_rescue(p: dict) -> bool:
@@ -267,8 +273,6 @@ def main(token: str) -> None:
         encoding="utf-8",
     )
 
-    # Email first. If SMTP fails, the workflow can safely fall back to the
-    # legacy pipeline without creating a duplicate semantic issue beforehand.
     send_email(email_report, len(selected))
     make_github_issue(
         title=f"{issue_title} · semantic ISM",
