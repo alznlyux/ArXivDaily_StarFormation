@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/one_time_semantic_mail.yml'
+      - '.github/one_time_semantic_mail.trigger'
   workflow_dispatch: {}
 
 jobs:
