@@ -1,0 +1,33 @@
+name: v2.6 Scope Calibration Only
+
+on:
+  push:
+    branches: [v2-experiment]
+    paths:
+      - '.github/workflows/v2_scope_only.yml'
+  workflow_dispatch: {}
+
+jobs:
+  calibrate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Apply v2.6 scope calibration to existing v2.5 result
+        run: python v2/v2_scope_calibrate.py --input v2_results/2026-08-23-zero-shot-reranked.json --output-dir v2_results
+
+      - name: Commit calibrated benchmark
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- v2_results/2026-08-23-final-calibrated.md v2_results/2026-08-23-final-calibrated.json
+          git commit -m "Add v2.6 final calibrated benchmark"
+          git push
