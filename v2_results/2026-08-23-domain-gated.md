@@ -1,16 +1,16 @@
 # ISM Literature Recommender v2.2 — Domain-Gated SPECTER2
 
-Generated: 2026-08-23T04:45:28Z
+Generated: 2026-08-23T04:56:34Z
 Lookback: last 10 days
 
 ## Summary
 
-- Candidates: **455**
+- Candidates: **454**
 - Current keyword baseline: **61**
 - A: **3**
 - B: **27**
 - C: **29**
-- SKIP: **396**
+- SKIP: **395**
 - Downgraded by domain gate: **90**
 - Rescued by domain evidence: **2**
 
@@ -74,11 +74,11 @@ Lookback: last 10 days
 ### [B] 72.5 — The efficient star-forming regions of stripped-envelope supernovae
 - **arXiv:** [2608.18897](https://arxiv.org/abs/2608.18897)
 - **Primary:** astro-ph.GA
-- **Positive / negative:** `astrochemistry` 0.7478 / `galaxy_evolution_agn` 0.7307
+- **Positive / negative:** `astrochemistry` 0.7477 / `galaxy_evolution_agn` 0.7307
 - **Margin:** +0.0170
 - **Domain evidence:** 18.75 (title 3.75)
 - **Gate:** B → B — contrastive
-- **Top positive topics:** astrochemistry (0.7478), galactic_ism_surveys (0.7445), massive_star_formation (0.7359)
+- **Top positive topics:** astrochemistry (0.7477), galactic_ism_surveys (0.7445), massive_star_formation (0.7359)
 - **Current keyword:** NO
 - **Abstract:** Massive stars ($> 8~\rm{M}_{\odot}$) play a key role in shaping the interstellar medium of galaxies through stellar feedback. However, how these stars form and evolve before exploding as core-collapse supernovae (SNe) remains elusive. We compute for the first time the star-formation efficiencies (SFEs) at the locations of hydrogen-rich (H-rich) SNe and stripped-envelope SNe (SESNe) to constrain their progenitor properties. We used VLT/MUSE and ALMA observations of H$α$/H$β$ and CO(2-1) emission lines to trace the components of the warm ionised gas and cold molecular gas, respectively. Both observations resolve individual H II regions and giant molecular clouds at spatial resolutions on cloud-scales ($\sim$100 pc). This combined data allows us to compute the SFE from the star formation rate (SFR) and the molecular gas mass (M$_{\rm{mol}}$) as SFE = SFR/M$_{\rm{mol}}$. We find that SESNe explode in environments that are currently forming stars eight times more efficiently than those of H-rich SNe (higher SFR for SESNe with similar M$_{\rm{mol}}$). On one hand, this is consistent with the scenario in which the majority of SESNe are produced from very massive stars ($> 20~\rm{M}_{\odot}$) if the initial mass function is top-heavy. On the other hand, most of SESN progenitor channels are formed from interacting binaries ($< 20~\rm{M}_{\odot}$) if an increased binary system formation rate is connected with turbulences and, in turn, with the boost to SFE. Then, an increased binary fraction could explain the enhanced H$α$ luminosities. In summary, SESNe preferentially occur in regions of intense, efficient star formation rather than simply higher gas content.
 
@@ -184,11 +184,11 @@ Lookback: last 10 days
 ### [B] 66.8 — The THESAN-ZOOM project: clumpiness of high-redshift galaxies and its connection to bursty star formation
 - **arXiv:** [2608.19308](https://arxiv.org/abs/2608.19308)
 - **Primary:** astro-ph.GA
-- **Positive / negative:** `massive_star_formation` 0.7502 / `galaxy_evolution_agn` 0.7328
+- **Positive / negative:** `massive_star_formation` 0.7501 / `galaxy_evolution_agn` 0.7328
 - **Margin:** +0.0174
 - **Domain evidence:** 6.75 (title 2.25)
 - **Gate:** C → B — rescued by direct ISM/star-formation title evidence
-- **Top positive topics:** massive_star_formation (0.7502), turbulence (0.7459), molecular_clouds (0.7386)
+- **Top positive topics:** massive_star_formation (0.7501), turbulence (0.7459), molecular_clouds (0.7386)
 - **Current keyword:** NO
 - **Abstract:** Recent JWST observations have revealed diverse high-redshift galaxy morphologies, including a population with irregular and clumpy structures. The physical origin of these structures, and the extent to which observational biases shape their appearance, remain uncertain. We present a power-spectrum-based method for quantifying galaxy clumpiness across spatial scales, using the radiation-hydrodynamic simulation suite THESAN-ZOOM, which employs a state-of-the-art galaxy formation model that resolves the multiphase interstellar medium (ISM). Although the total stellar mass distributions in THESAN-ZOOM galaxies are usually smooth, clumpy structures appear in the H$α$, far-ultraviolet (FUV), and optical light distributions. Tracers sensitive to shorter-timescale star formation exhibit more pronounced small-scale structure ($\sim10^{2}$--$10^{3}{\rm pc}$). The corresponding projected light spectra follow $P(k)\propto k^{-1}$ to $k^{-2}$, with progressively shallower slopes for tracers sensitive to more recent star formation, reflecting enhanced small-scale power and greater spatial intermittency in young stellar populations. This behaviour is consistent with a highly compressible, shock-dominated ISM in which stellar feedback and outflows reorganise dense gas into filamentary and clumpy structures. We also find that galaxy clumpiness depends on the treatment of stellar feedback. Weaker early stellar feedback enhances small-scale power in both the mass and light distributions. Clumpiness also varies strongly over the bursty star formation cycle, implying that observed samples may be biased towards galaxies caught in phases of elevated star formation. Galaxy clumpiness, therefore, could provide a complementary probe of the bursty star formation in the early Universe.
 

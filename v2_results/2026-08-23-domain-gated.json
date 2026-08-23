@@ -1,13 +1,13 @@
 {
   "summary": {
-    "generated_utc": "2026-08-23T04:45:28Z",
+    "generated_utc": "2026-08-23T04:56:34Z",
     "lookback_days": 10,
-    "candidate_count": 455,
+    "candidate_count": 454,
     "current_keyword_selected": 61,
     "A": 3,
     "B": 27,
     "C": 29,
-    "SKIP": 396,
+    "SKIP": 395,
     "downgraded_by_gate": 90,
     "rescued_by_gate": 2,
     "method": "v2.1 contrastive SPECTER2 + explicit ISM object evidence + primary-category gating + conservative rescue rules"
@@ -425,7 +425,7 @@
       "gate_reason": "contrastive",
       "score": 72.5,
       "best_positive_topic": "astrochemistry",
-      "best_positive_semantic": 0.7478,
+      "best_positive_semantic": 0.7477,
       "best_negative_topic": "galaxy_evolution_agn",
       "best_negative_semantic": 0.7307,
       "semantic_margin": 0.017,
@@ -445,7 +445,7 @@
       "top_positive_topics": [
         {
           "topic": "astrochemistry",
-          "semantic_raw": 0.7478
+          "semantic_raw": 0.7477
         },
         {
           "topic": "galactic_ism_surveys",
@@ -980,7 +980,7 @@
       "gate_reason": "rescued by direct ISM/star-formation title evidence",
       "score": 66.8,
       "best_positive_topic": "massive_star_formation",
-      "best_positive_semantic": 0.7502,
+      "best_positive_semantic": 0.7501,
       "best_negative_topic": "galaxy_evolution_agn",
       "best_negative_semantic": 0.7328,
       "semantic_margin": 0.0174,
@@ -996,7 +996,7 @@
       "top_positive_topics": [
         {
           "topic": "massive_star_formation",
-          "semantic_raw": 0.7502
+          "semantic_raw": 0.7501
         },
         {
           "topic": "turbulence",
@@ -4843,7 +4843,7 @@
         },
         {
           "topic": "massive_star_formation",
-          "semantic_raw": 0.6885
+          "semantic_raw": 0.6886
         }
       ]
     },
@@ -10639,7 +10639,7 @@
         },
         {
           "topic": "massive_star_formation",
-          "semantic_raw": 0.7224
+          "semantic_raw": 0.7223
         }
       ]
     },
@@ -11981,7 +11981,7 @@
         },
         {
           "topic": "astrochemistry",
-          "semantic_raw": 0.6735
+          "semantic_raw": 0.6734
         }
       ]
     },
@@ -17691,7 +17691,7 @@
       "gate_reason": "negative-domain match with weak ISM evidence",
       "score": 39.2,
       "best_positive_topic": "feedback_bubbles",
-      "best_positive_semantic": 0.6986,
+      "best_positive_semantic": 0.6985,
       "best_negative_topic": "planetary_disks_exoplanets",
       "best_negative_semantic": 0.717,
       "semantic_margin": -0.0185,
@@ -17703,7 +17703,7 @@
       "top_positive_topics": [
         {
           "topic": "feedback_bubbles",
-          "semantic_raw": 0.6986
+          "semantic_raw": 0.6985
         },
         {
           "topic": "galactic_ism_surveys",
@@ -19503,53 +19503,6 @@
       ]
     },
     {
-      "id": "2608.17672",
-      "title": "A Semi-Analytical Theory for Improved Orbit Design of the GARATÉA-L",
-      "abstract": "This work proposes a semi-analytical theory for improving orbit design of the GARATÉA-L Brazilian lunar mission. The dynamical model incorporates the lunar gravitational potential up to degree 12 and order 3 harmonics and a third-body perturbation model accounting for the eccentricity and inclination of the Earth's orbit with respect to the Moon. Through Hori's method, short- and medium-period terms are eliminated from the Hamiltonian to derive a first-order theory in mean orbital elements. It is demonstrated that nominal frozen orbits designed under simplified circular and equatorial assumptions for the motion of the third body are not maintained in this more realistic dynamical environment, leading to significant eccentricity growth and potential collisions of the probe with the lunar surface. The inclusion of the third body's inclination and eccentricity breaks the system's axial symmetry, introducing the longitude of the ascending node into the double-averaged variational equations and rendering stationary frozen orbits practically unattainable. Consequently, the problem is addressed through a parametric study around the simplified model's frozen conditions to identify ``low-drift\" states where eccentricity variations are highly decreased. A new nominal orbit is proposed for GARATÉA-L. Numerical validation against high-fidelity propagation and JPL ephemeris confirms that this new configuration maintains the ``low-drift\" behaviour throughout the mission, ensuring orbital safety and avoiding the collision predicted by simpler models.",
-      "authors": [
-        "Luiz Arthur Gagg Filho",
-        "Sandro da Silva Fernandes"
-      ],
-      "categories": [
-        "astro-ph.EP",
-        "math.DS",
-        "physics.space-ph"
-      ],
-      "primary_category": "astro-ph.EP",
-      "published": "2026-08-18T11:43:27Z",
-      "main_page": "https://arxiv.org/abs/2608.17672",
-      "pdf": "https://arxiv.org/pdf/2608.17672.pdf",
-      "current_keyword_selected": false,
-      "base_contrastive_priority": "SKIP",
-      "priority": "SKIP",
-      "gate_reason": "negative-domain match with weak ISM evidence",
-      "score": 36.1,
-      "best_positive_topic": "magnetic_fields",
-      "best_positive_semantic": 0.661,
-      "best_negative_topic": "planetary_disks_exoplanets",
-      "best_negative_semantic": 0.692,
-      "semantic_margin": -0.031,
-      "positive_lexical": 0.0,
-      "negative_lexical": 0.0,
-      "domain_evidence_score": 0.0,
-      "title_domain_score": 0.0,
-      "domain_hits": [],
-      "top_positive_topics": [
-        {
-          "topic": "magnetic_fields",
-          "semantic_raw": 0.661
-        },
-        {
-          "topic": "turbulence",
-          "semantic_raw": 0.6539
-        },
-        {
-          "topic": "molecular_clouds",
-          "semantic_raw": 0.6508
-        }
-      ]
-    },
-    {
       "id": "2608.17241",
       "title": "Surface gravity wave on a neutron star ocean trapped around a magnetic pole",
       "abstract": "A warm neutron star is expected to have a fluid \"ocean\" of heavy elements at its outermost part of the outer crust. As is on the terrestrial ocean, the neutron star ocean also has surface gravity waves. Around a magnetic pole of a star, the ocean may have a dip due to the strong magnetic pressure coming into play in the hydrostatic balance of the ocean. The dip enables the surface gravity wave to be trapped around the magnetic pole to form eigenmodes. The frequency of the mode is much lower than the dynamical frequency at the stellar surface, owing to the weak Coriolis force and the gradient in the ocean's depth that makes the eigenmodes present. We solve the equation of surface gravity waves in the local $β$-plane approximation and obtain the spectrum of discrete eigenmodes. We see that there are no axisymmetric modes and that the mode frequency decreases and asymptotes to zero as the number of nodes of the corresponding eigenfunction increases. This is reminiscent of the g-modes in the context of asteroseismology. Observations of X-ray binaries containing neutron stars reveal that some of the systems exhibit low-frequency quasi-periodic oscillations (QPOs) whose frequency is $1-10^3$mHz. We investigate whether the eigenmodes considered here may explain the low-frequency QPO spectrum. It is suggested that some of the QPOs in the system whose neutron star spins at the period less than $10$s may be consistent with the model. As far as the spin period is larger than $10$s, the eigenmode frequencies are too low to explain the observed QPOs.",
@@ -19639,6 +19592,53 @@
         {
           "topic": "turbulence",
           "semantic_raw": 0.715
+        }
+      ]
+    },
+    {
+      "id": "2608.17672",
+      "title": "A Semi-Analytical Theory for Improved Orbit Design of the GARATÉA-L",
+      "abstract": "This work proposes a semi-analytical theory for improving orbit design of the GARATÉA-L Brazilian lunar mission. The dynamical model incorporates the lunar gravitational potential up to degree 12 and order 3 harmonics and a third-body perturbation model accounting for the eccentricity and inclination of the Earth's orbit with respect to the Moon. Through Hori's method, short- and medium-period terms are eliminated from the Hamiltonian to derive a first-order theory in mean orbital elements. It is demonstrated that nominal frozen orbits designed under simplified circular and equatorial assumptions for the motion of the third body are not maintained in this more realistic dynamical environment, leading to significant eccentricity growth and potential collisions of the probe with the lunar surface. The inclusion of the third body's inclination and eccentricity breaks the system's axial symmetry, introducing the longitude of the ascending node into the double-averaged variational equations and rendering stationary frozen orbits practically unattainable. Consequently, the problem is addressed through a parametric study around the simplified model's frozen conditions to identify ``low-drift\" states where eccentricity variations are highly decreased. A new nominal orbit is proposed for GARATÉA-L. Numerical validation against high-fidelity propagation and JPL ephemeris confirms that this new configuration maintains the ``low-drift\" behaviour throughout the mission, ensuring orbital safety and avoiding the collision predicted by simpler models.",
+      "authors": [
+        "Luiz Arthur Gagg Filho",
+        "Sandro da Silva Fernandes"
+      ],
+      "categories": [
+        "astro-ph.EP",
+        "math.DS",
+        "physics.space-ph"
+      ],
+      "primary_category": "astro-ph.EP",
+      "published": "2026-08-18T11:43:27Z",
+      "main_page": "https://arxiv.org/abs/2608.17672",
+      "pdf": "https://arxiv.org/pdf/2608.17672.pdf",
+      "current_keyword_selected": false,
+      "base_contrastive_priority": "SKIP",
+      "priority": "SKIP",
+      "gate_reason": "negative-domain match with weak ISM evidence",
+      "score": 36.0,
+      "best_positive_topic": "magnetic_fields",
+      "best_positive_semantic": 0.661,
+      "best_negative_topic": "planetary_disks_exoplanets",
+      "best_negative_semantic": 0.692,
+      "semantic_margin": -0.031,
+      "positive_lexical": 0.0,
+      "negative_lexical": 0.0,
+      "domain_evidence_score": 0.0,
+      "title_domain_score": 0.0,
+      "domain_hits": [],
+      "top_positive_topics": [
+        {
+          "topic": "magnetic_fields",
+          "semantic_raw": 0.661
+        },
+        {
+          "topic": "turbulence",
+          "semantic_raw": 0.6539
+        },
+        {
+          "topic": "molecular_clouds",
+          "semantic_raw": 0.6508
         }
       ]
     },
@@ -21574,7 +21574,7 @@
       "gate_reason": "contrastive",
       "score": 32.2,
       "best_positive_topic": "turbulence",
-      "best_positive_semantic": 0.6505,
+      "best_positive_semantic": 0.6506,
       "best_negative_topic": "cosmology_large_scale_structure",
       "best_negative_semantic": 0.69,
       "semantic_margin": -0.0395,
@@ -21586,7 +21586,7 @@
       "top_positive_topics": [
         {
           "topic": "turbulence",
-          "semantic_raw": 0.6505
+          "semantic_raw": 0.6506
         },
         {
           "topic": "massive_star_formation",
@@ -21685,54 +21685,6 @@
         {
           "topic": "molecular_clouds",
           "semantic_raw": 0.7241
-        }
-      ]
-    },
-    {
-      "id": "2608.12819",
-      "title": "Waterfall-modulated $α$-attractors",
-      "abstract": "Hybrid $α$-attractor models \\cite{Kallosh:2022ggf} can have significantly greater values of $n_{s}$ and smaller $r$, while preserving the relation $r\\cong 3α(1-n_s)^2$, which is valid for exponential T- and E-models at large values of the inflaton field. Here we study single-field $α$-attractors with features inspired by hybrid models: one can uplift the potential, and one can also have a waterfall regime that leads to a premature termination of inflation near the critical point $\\varphi_c$. This allows one to increase the effective number of e-foldings $N_c$ in formulas like $n_s\\simeq 1-{2\\over N_c}$, $r\\simeq {12 α\\over N_c^2}$. By changing the waterfall's steepness and location, one can continuously move the predictions along the curves with $r\\cong 3α(1-n_s)^2$ as $n_s$ increases and $r$ decreases. We also study the effect of waterfall insertions and uplift on $n_s$ in quintessential $α$-attractors that describe inflation and dynamical dark energy.",
-      "authors": [
-        "Renata Kallosh",
-        "Andrei Linde",
-        "Yusuke Yamada"
-      ],
-      "categories": [
-        "astro-ph.CO",
-        "gr-qc",
-        "hep-th"
-      ],
-      "primary_category": "astro-ph.CO",
-      "published": "2026-08-13T04:48:51Z",
-      "main_page": "https://arxiv.org/abs/2608.12819",
-      "pdf": "https://arxiv.org/pdf/2608.12819.pdf",
-      "current_keyword_selected": false,
-      "base_contrastive_priority": "SKIP",
-      "priority": "SKIP",
-      "gate_reason": "contrastive",
-      "score": 31.5,
-      "best_positive_topic": "galactic_ism_surveys",
-      "best_positive_semantic": 0.6715,
-      "best_negative_topic": "cosmology_large_scale_structure",
-      "best_negative_semantic": 0.705,
-      "semantic_margin": -0.0336,
-      "positive_lexical": 0.0,
-      "negative_lexical": 0.2835,
-      "domain_evidence_score": 0.0,
-      "title_domain_score": 0.0,
-      "domain_hits": [],
-      "top_positive_topics": [
-        {
-          "topic": "galactic_ism_surveys",
-          "semantic_raw": 0.6715
-        },
-        {
-          "topic": "magnetic_fields",
-          "semantic_raw": 0.6704
-        },
-        {
-          "topic": "atomic_ism",
-          "semantic_raw": 0.6602
         }
       ]
     },
@@ -23719,11 +23671,11 @@
           "semantic_raw": 0.7281
         },
         {
-          "topic": "galactic_ism_surveys",
+          "topic": "astrochemistry",
           "semantic_raw": 0.7246
         },
         {
-          "topic": "astrochemistry",
+          "topic": "galactic_ism_surveys",
           "semantic_raw": 0.7246
         }
       ]
