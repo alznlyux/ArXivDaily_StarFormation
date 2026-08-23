@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Apply v2.6 scope calibration to existing v2.5 result
+      - name: Apply tightened v2.6 scope calibration to existing v2.5 result
         run: python v2/v2_scope_calibrate.py --input v2_results/2026-08-23-zero-shot-reranked.json --output-dir v2_results
 
       - name: Commit calibrated benchmark
@@ -29,5 +29,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- v2_results/2026-08-23-final-calibrated.md v2_results/2026-08-23-final-calibrated.json
-          git commit -m "Add v2.6 final calibrated benchmark"
-          git push
+          if git diff --cached --quiet; then
+            echo "No calibrated benchmark changes."
+          else
+            git commit -m "Update tightened v2.6 final calibrated benchmark"
+            git push
+          fi
