@@ -1,23 +1,24 @@
-name: Semantic Recommender Production Smoke Test
+name: Semantic Recommender Smoke Test
 
 on:
   push:
-    branches: [feature/semantic-production-v2]
+    branches: [main, standalone-v1]
     paths:
+      - 'daily.py'
       - 'semantic_*.py'
       - 'semantic_topics.json'
       - 'github_issue.py'
       - 'requirements.txt'
-      - '.github/workflows/semantic_production_test.yml'
+      - '.github/workflows/*.yml'
   pull_request:
     branches: [main]
     paths:
+      - 'daily.py'
       - 'semantic_*.py'
       - 'semantic_topics.json'
       - 'github_issue.py'
       - 'requirements.txt'
-      - '.github/workflows/daily_arxiv.yml'
-      - '.github/workflows/semantic_production_test.yml'
+      - '.github/workflows/*.yml'
   workflow_dispatch: {}
 
 jobs:
@@ -45,7 +46,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Compile production code
-        run: python -m py_compile semantic_daily.py semantic_recommender.py semantic_smoke_test.py github_issue.py
+        run: python -m py_compile daily.py semantic_daily.py semantic_recommender.py semantic_smoke_test.py github_issue.py
 
       - name: Run semantic smoke test
         run: python semantic_smoke_test.py
