@@ -1,7 +1,7 @@
 # coding: utf-8
 """v2.6 stable group-scope calibration for the ISM recommender.
 
-This is not a learned model and is not intended to change daily.  It encodes the
+This is not a learned model and is not intended to change daily. It encodes the
 current group scope: Galactic/local ISM and star-formation science are primary;
 CGM, high-redshift galaxy-evolution, and broad extragalactic survey papers are
 kept as lower-priority boundary material unless their title is explicitly about
@@ -35,16 +35,21 @@ def calibrate(p: dict) -> tuple[str, str]:
     abstract = p.get("abstract", "")
     text = title + "\n" + abstract
 
-    # --- Explicit Galactic/local ISM rescues ---------------------------------
-    # These are scientifically direct object/process statements that can be
-    # under-scored when the same physics vocabulary is common in HE/galaxy work.
+    # Explicit Galactic/local ISM rescues. A Galactic-centre mention alone is
+    # not enough: the same region hosts stellar-dynamics/SMBH papers. Require a
+    # direct gas/cloud/ISM object signal, not merely "star formation".
     fermi_hi = (
         has(r"Fermi Bubbles?", text)
-        and has(r"\b(?:neutral gas|neutral clouds?|H\s*I\s+(?:data|clouds?|gas|emission)|NHI)\b", text)
+        and has(r"\b(?:neutral gas|neutral clouds?|H\s*I\s+(?:data|clouds?|gas|emission)|N[_ ]?HI)\b", text)
     )
-    cmz_gas = (
-        has(r"\b(?:CMZ|Central Molecular Zone|Galactic Cent(?:re|er))\b", text)
-        and has(r"\b(?:molecular|atomic|gas|cloud|feedback|turbulence|star formation)\b", text)
+    cmz_title = has(r"\b(?:CMZ|Central Molecular Zone)\b", title)
+    galactic_center_gas = (
+        has(r"\bGalactic Cent(?:re|er)\b", text)
+        and has(
+            r"\b(?:molecular gas|molecular clouds?|atomic gas|neutral gas|gas cloud|gas clouds|"
+            r"interstellar medium|ISM|dense gas|CMZ|Central Molecular Zone)\b",
+            text,
+        )
     )
     interstellar_magnetic = has(
         r"\binterstellar\b.*\b(?:magnetic|reconnection|filament|gas|medium)\b|"
@@ -56,10 +61,11 @@ def calibrate(p: dict) -> tuple[str, str]:
         title,
     )
 
-    if old in {"SKIP", "C"} and (fermi_hi or cmz_gas or interstellar_magnetic or explicit_hi_title):
+    if old in {"SKIP", "C"} and (
+        fermi_hi or cmz_title or galactic_center_gas or interstellar_magnetic or explicit_hi_title
+    ):
         return "B", "stable-scope rescue: explicit Galactic/local ISM object in title/abstract"
 
-    # --- Scope caps -----------------------------------------------------------
     # External-galaxy CGM is not the group's core daily-reading scope even when
     # the tracer is H I.
     external_cgm = has(r"\b(?:circumgalactic medium|CGM)\b", text) and not has(
