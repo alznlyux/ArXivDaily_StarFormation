@@ -1,4 +1,4 @@
-name: Semantic Recommender Smoke Test
+name: AstroBrief Smoke Test
 
 on:
   push:
@@ -38,9 +38,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
-          key: ism-semantic-models-${{ runner.os }}-v1
+          key: astrobrief-models-${{ runner.os }}-v1
           restore-keys: |
-            ism-semantic-models-${{ runner.os }}-
+            astrobrief-models-${{ runner.os }}-
 
       - name: Install dependencies
         run: pip install -r requirements.txt
