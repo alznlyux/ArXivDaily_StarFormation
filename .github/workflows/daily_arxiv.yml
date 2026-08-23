@@ -61,7 +61,10 @@ jobs:
           set -e
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- README.md Arxiv_Daily_Notice/ semantic_results/
+          git add -- README.md Arxiv_Daily_Notice/
+          if [ -d semantic_results ]; then
+            git add -- semantic_results/
+          fi
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
