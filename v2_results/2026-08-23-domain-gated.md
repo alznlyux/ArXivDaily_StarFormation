@@ -1,6 +1,6 @@
 # ISM Literature Recommender v2.2 — Domain-Gated SPECTER2
 
-Generated: 2026-08-23T04:56:34Z
+Generated: 2026-08-23T05:07:45Z
 Lookback: last 10 days
 
 ## Summary

@@ -1,6 +1,6 @@
 # ISM Literature Recommender v2.5 — Conservative SPECTER2 + Zero-Shot NLI
 
-Generated: 2026-08-23T04:59:27Z
+Generated: 2026-08-23T05:11:33Z
 Source: `2026-08-23-domain-gated.json`
 
 ## Summary
