@@ -1,5 +1,5 @@
 # coding: utf-8
-from semantic_daily import _extract_categories
+from semantic_daily import _extract_categories, apply_final_scope_guard
 from semantic_recommender import score_papers
 
 
@@ -48,9 +48,16 @@ def main():
             "We model shocks and turbulent outflows from tidal disruption events and luminous fast blue optical transients around compact objects.",
             "astro-ph.HE",
         ),
+        paper(
+            "test.0005",
+            "A model for the enhanced production rate of early-type hypervelocity stars in the Galactic halo",
+            "The stars were ejected from the Galactic center by a black-hole gravitational slingshot. We constrain their stellar formation history and orbital dynamics in the nuclear star cluster.",
+            "astro-ph.GA",
+        ),
     ]
 
     scored, summary = score_papers(papers)
+    scored, summary = apply_final_scope_guard(scored, summary)
     by_id = {p["id"]: p for p in scored}
     for p in scored:
         print(p["id"], p["priority"], p["score"], p["best_positive_topic"], p["scope_reason"])
@@ -59,7 +66,8 @@ def main():
     assert by_id["test.0002"]["priority"] in {"A", "B"}, by_id["test.0002"]
     assert by_id["test.0003"]["priority"] in {"C", "SKIP"}, by_id["test.0003"]
     assert by_id["test.0004"]["priority"] in {"C", "SKIP"}, by_id["test.0004"]
-    assert summary["candidate_count"] == 4
+    assert by_id["test.0005"]["priority"] in {"C", "SKIP"}, by_id["test.0005"]
+    assert summary["candidate_count"] == 5
     print("[OK] semantic smoke test passed")
 
 
