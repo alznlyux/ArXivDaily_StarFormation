@@ -1,7 +1,11 @@
 # coding: utf-8
-from bs4 import BeautifulSoup
+"""Regression checks for AstroBrief ingestion and semantic scope decisions."""
+from __future__ import annotations
 
-from semantic_daily import _daily_submission_lists, _extract_categories, apply_final_scope_guard
+import datetime as dt
+
+import semantic_daily
+from semantic_daily import _fetch_arxiv_day, apply_final_scope_guard
 from semantic_recommender import score_papers
 
 
@@ -19,25 +23,64 @@ def paper(pid, title, abstract, primary):
     }
 
 
-def main():
-    cats = _extract_categories(
-        "Astrophysics of Galaxies (astro-ph.GA); Solar and Stellar Astrophysics (astro-ph.SR); Plasma Physics (physics.plasm-ph)"
-    )
-    assert cats == ["astro-ph.GA", "astro-ph.SR", "physics.plasm-ph"], cats
-
-    # Parser regression: include new + cross-lists but exclude replacements.
-    html = """
-    <div id='content'>
-      <h3>Showing new listings</h3>
-      <h3>New submissions</h3><dl id='new'></dl>
-      <h3>Cross-lists</h3><dl id='cross'></dl>
-      <h3>Replacements</h3><dl id='replace'></dl>
-    </div>
+def test_atom_ingestion() -> None:
+    """Verify structured Atom parsing, version stripping, and astro-ph filtering."""
+    xml = b"""<?xml version='1.0' encoding='UTF-8'?>
+    <feed xmlns='http://www.w3.org/2005/Atom' xmlns:arxiv='http://arxiv.org/schemas/atom'>
+      <entry>
+        <id>https://arxiv.org/abs/2608.12345v2</id>
+        <title>  Dense molecular gas in a nearby cloud  </title>
+        <summary>We study cold molecular gas and star formation.</summary>
+        <author><name>Example Author</name></author>
+        <category term='astro-ph.GA'/>
+        <category term='astro-ph.SR'/>
+        <arxiv:primary_category term='astro-ph.GA'/>
+      </entry>
+      <entry>
+        <id>https://arxiv.org/abs/2608.99999v1</id>
+        <title>Non-astronomy control</title>
+        <summary>A control entry outside astronomy.</summary>
+        <author><name>Control Author</name></author>
+        <category term='physics.plasm-ph'/>
+        <arxiv:primary_category term='physics.plasm-ph'/>
+      </entry>
+    </feed>
     """
-    content = BeautifulSoup(html, "html.parser").find("div", id="content")
-    section_ids = [x.get("id") for x in _daily_submission_lists(content)]
-    assert section_ids == ["new", "cross"], section_ids
 
+    class FakeResponse:
+        content = xml
+
+        @staticmethod
+        def raise_for_status():
+            return None
+
+    calls = []
+    original_get = semantic_daily.requests.get
+
+    def fake_get(url, **kwargs):
+        calls.append((url, kwargs))
+        return FakeResponse()
+
+    semantic_daily.requests.get = fake_get
+    try:
+        papers = _fetch_arxiv_day(dt.date(2026, 8, 21))
+    finally:
+        semantic_daily.requests.get = original_get
+
+    assert len(papers) == 1, papers
+    parsed = papers[0]
+    assert parsed["id"] == "2608.12345", parsed
+    assert parsed["title"] == "Dense molecular gas in a nearby cloud", parsed
+    assert parsed["authors"] == ["Example Author"], parsed
+    assert parsed["categories"] == ["astro-ph.GA", "astro-ph.SR"], parsed
+    assert parsed["primary_category"] == "astro-ph.GA", parsed
+    assert calls and calls[0][0] == semantic_daily.ARXIV_API, calls
+    assert "cat:astro-ph.*" in calls[0][1]["params"]["search_query"], calls
+    assert "submittedDate:[202608210000 TO 202608212359]" in calls[0][1]["params"]["search_query"], calls
+    assert calls[0][1]["headers"]["User-Agent"].startswith("AstroBrief/"), calls
+
+
+def test_semantic_scope() -> None:
     papers = [
         paper(
             "test.0001",
@@ -75,7 +118,13 @@ def main():
     scored, summary = apply_final_scope_guard(scored, summary)
     by_id = {p["id"]: p for p in scored}
     for p in scored:
-        print(p["id"], p["priority"], p["score"], p["best_positive_topic"], p["scope_reason"])
+        print(
+            p["id"],
+            p["priority"],
+            p["score"],
+            p["best_positive_topic"],
+            p["scope_reason"],
+        )
 
     assert by_id["test.0001"]["priority"] in {"A", "B"}, by_id["test.0001"]
     assert by_id["test.0002"]["priority"] in {"A", "B"}, by_id["test.0002"]
@@ -83,7 +132,12 @@ def main():
     assert by_id["test.0004"]["priority"] in {"C", "SKIP"}, by_id["test.0004"]
     assert by_id["test.0005"]["priority"] in {"C", "SKIP"}, by_id["test.0005"]
     assert summary["candidate_count"] == 5
-    print("[OK] semantic smoke test passed")
+
+
+def main() -> None:
+    test_atom_ingestion()
+    test_semantic_scope()
+    print("[OK] AstroBrief smoke test passed")
 
 
 if __name__ == "__main__":
