@@ -8,6 +8,14 @@ on:
       - 'semantic_topics.json'
       - 'requirements.txt'
       - '.github/workflows/semantic_production_test.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'semantic_*.py'
+      - 'semantic_topics.json'
+      - 'requirements.txt'
+      - '.github/workflows/daily_arxiv.yml'
+      - '.github/workflows/semantic_production_test.yml'
   workflow_dispatch: {}
 
 jobs:
