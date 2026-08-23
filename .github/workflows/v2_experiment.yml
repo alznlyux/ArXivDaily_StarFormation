@@ -54,7 +54,7 @@ jobs:
           echo "$status" > v2_results/domain-gated-exit-code.txt
           exit "$status"
 
-      - name: Run relative zero-shot NLI v2.4 reranker
+      - name: Run conservative zero-shot NLI v2.5 reranker
         id: nli
         if: steps.domain_gated.outcome == 'success'
         continue-on-error: true
@@ -74,7 +74,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No experiment output changes."
           else
-            git commit -m "Update v2.4 SPECTER2 plus zero-shot NLI recommender experiment"
+            git commit -m "Update v2.5 SPECTER2 plus zero-shot NLI recommender experiment"
             git push
           fi
 
