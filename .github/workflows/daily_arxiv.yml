@@ -2,8 +2,8 @@ name: arXiv ISM Daily (Semantic + Email)
 
 on:
   schedule:
-    # Weekdays, Beijing 09:00 (UTC 01:00)
-    - cron: '0 1 * * 1-5'
+    # Weekdays, Beijing 09:30 (UTC 01:30)
+    - cron: '30 1 * * 1-5'
   workflow_dispatch: {}
 
 jobs:
