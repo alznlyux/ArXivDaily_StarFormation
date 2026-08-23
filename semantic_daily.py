@@ -20,6 +20,16 @@ from github_issue import make_github_issue
 from semantic_recommender import score_papers
 
 
+def _extract_categories(subjects: str) -> list[str]:
+    """Extract arXiv category codes from the parenthesized subject labels."""
+    categories = []
+    for value in re.findall(r"\(([^()]+)\)", subjects):
+        value = value.strip()
+        if re.fullmatch(r"[A-Za-z0-9.-]+", value):
+            categories.append(value)
+    return categories
+
+
 def fetch_daily_papers() -> tuple[str, list[dict]]:
     """Read the official astro-ph new-list page, but do not keyword-filter it."""
     headers = {"User-Agent": "ArXivDaily-ISM/2.0 (+https://github.com/alznlyux/ArXivDaily_StarFormation)"}
@@ -51,7 +61,7 @@ def fetch_daily_papers() -> tuple[str, list[dict]]:
         authors_text = authors_node.get_text(" ", strip=True).replace("Authors:", "", 1).strip()
         subjects = subjects_node.get_text(" ", strip=True).replace("Subjects:", "", 1).strip()
         abstract = re.sub(r"\s+", " ", abstract_node.get_text(" ", strip=True)).strip()
-        categories = re.findall(r"(?:astro-ph\.[A-Z]{2}|[a-z-]+\.[A-Z]{2}|[a-z-]+(?:\.[A-Z]{2})?)", subjects)
+        categories = _extract_categories(subjects)
         astro_categories = [c for c in categories if c.startswith("astro-ph.")]
         primary = categories[0] if categories else (astro_categories[0] if astro_categories else "")
 
@@ -66,6 +76,8 @@ def fetch_daily_papers() -> tuple[str, list[dict]]:
             "main_page": f"https://arxiv.org/abs/{paper_id}",
             "pdf": f"https://arxiv.org/pdf/{paper_id}.pdf",
         })
+    if not papers:
+        raise RuntimeError("No papers parsed from astro-ph/new")
     print(f"[INFO] Parsed {len(papers)} papers from astro-ph/new")
     return issue_title, papers
 
@@ -181,13 +193,15 @@ def main(token: str) -> None:
         encoding="utf-8",
     )
 
+    # Email first. If SMTP fails, the workflow can safely fall back to the
+    # legacy pipeline without creating a duplicate semantic issue beforehand.
+    send_email(email_report, len(selected))
     make_github_issue(
         title=f"{issue_title} · semantic ISM",
         body=full_report,
         labels=None,
         TOKEN=token,
     )
-    send_email(email_report, len(selected))
     print("[SUMMARY]", json.dumps(summary, ensure_ascii=False))
 
 
