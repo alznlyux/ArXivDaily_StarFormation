@@ -82,6 +82,57 @@ def fetch_daily_papers() -> tuple[str, list[dict]]:
     return issue_title, papers
 
 
+def _true_galactic_ism_rescue(p: dict) -> bool:
+    """High-precision final check for scope-level Galactic/local ISM rescues."""
+    title = p.get("title", "")
+    text = title + "\n" + p.get("abstract", "")
+    h = lambda pattern, value=text: re.search(pattern, value, flags=re.I) is not None
+
+    fermi_hi = h(r"Fermi Bubbles?") and h(
+        r"\b(?:neutral gas|neutral clouds?|H\s*I\s+(?:data|clouds?|gas|emission)|N[_ ]?HI)\b"
+    )
+    cmz_title = h(r"\b(?:CMZ|Central Molecular Zone)\b", title)
+    galactic_center_gas = h(r"\bGalactic Cent(?:re|er)\b") and h(
+        r"\b(?:molecular gas|molecular clouds?|atomic gas|neutral gas|gas cloud|gas clouds|"
+        r"interstellar medium|ISM|dense gas|CMZ|Central Molecular Zone)\b"
+    )
+    interstellar_magnetic = h(
+        r"\binterstellar\b.*\b(?:magnetic|reconnection|filament|gas|medium)\b|"
+        r"\b(?:magnetic|reconnection|filament)\b.*\binterstellar\b",
+        title,
+    )
+    explicit_hi_title = h(
+        r"\b(?:neutral gas|neutral hydrogen|H\s*I\s+(?:clouds?|gas|emission|absorption|survey))\b",
+        title,
+    )
+    return fermi_hi or cmz_title or galactic_center_gas or interstellar_magnetic or explicit_hi_title
+
+
+def apply_final_scope_guard(scored: list[dict], summary: dict) -> tuple[list[dict], dict]:
+    """Undo any overbroad scope rescue before report/email generation.
+
+    The core semantic model is deliberately broad. The final production guard
+    prevents stellar-dynamics papers near the Galactic Center from being rescued
+    merely because their abstracts also mention star formation.
+    """
+    for p in scored:
+        reason = str(p.get("scope_reason", ""))
+        previous = p.get("pre_scope_priority")
+        if reason.startswith("scope rescue") and previous in {"SKIP", "C"}:
+            if not _true_galactic_ism_rescue(p):
+                p["priority"] = previous
+                p["scope_reason"] = "final scope guard reverted an overbroad Galactic-center rescue"
+
+    scored.sort(
+        key=lambda p: ({"SKIP": 0, "C": 1, "B": 2, "A": 3}[p["priority"]], float(p.get("score", 0.0))),
+        reverse=True,
+    )
+    summary = dict(summary)
+    for priority in ("A", "B", "C", "SKIP"):
+        summary[priority] = sum(p["priority"] == priority for p in scored)
+    return scored, summary
+
+
 def paper_block(p: dict) -> str:
     authors = ", ".join(p.get("authors", []))
     top_topics = ", ".join(p.get("top_topics", [])[:3])
@@ -177,6 +228,7 @@ def send_email(markdown_text: str, n_selected: int) -> None:
 def main(token: str) -> None:
     issue_title, papers = fetch_daily_papers()
     scored, summary = score_papers(papers)
+    scored, summary = apply_final_scope_guard(scored, summary)
     selected = [p for p in scored if p["priority"] in {"A", "B"}]
     full_report, email_report = build_reports(issue_title, scored, summary)
 
