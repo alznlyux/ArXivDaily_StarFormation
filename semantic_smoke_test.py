@@ -1,5 +1,7 @@
 # coding: utf-8
-from semantic_daily import _extract_categories, apply_final_scope_guard
+from bs4 import BeautifulSoup
+
+from semantic_daily import _daily_submission_lists, _extract_categories, apply_final_scope_guard
 from semantic_recommender import score_papers
 
 
@@ -22,6 +24,19 @@ def main():
         "Astrophysics of Galaxies (astro-ph.GA); Solar and Stellar Astrophysics (astro-ph.SR); Plasma Physics (physics.plasm-ph)"
     )
     assert cats == ["astro-ph.GA", "astro-ph.SR", "physics.plasm-ph"], cats
+
+    # Parser regression: include new + cross-lists but exclude replacements.
+    html = """
+    <div id='content'>
+      <h3>Showing new listings</h3>
+      <h3>New submissions</h3><dl id='new'></dl>
+      <h3>Cross-lists</h3><dl id='cross'></dl>
+      <h3>Replacements</h3><dl id='replace'></dl>
+    </div>
+    """
+    content = BeautifulSoup(html, "html.parser").find("div", id="content")
+    section_ids = [x.get("id") for x in _daily_submission_lists(content)]
+    assert section_ids == ["new", "cross"], section_ids
 
     papers = [
         paper(
