@@ -1,8 +1,8 @@
-name: arXiv Daily (GA/SR + Email)
+name: arXiv ISM Daily (Semantic + Email)
 
 on:
   schedule:
-    # 每周一到周五，北京 09:00（UTC 01:00）
+    # Weekdays, Beijing 09:00 (UTC 01:00)
     - cron: '0 1 * * 1-5'
   workflow_dispatch: {}
 
@@ -21,27 +21,39 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
+
+      - name: Restore semantic model cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/huggingface
+          key: ism-semantic-models-${{ runner.os }}-v1
+          restore-keys: |
+            ism-semantic-models-${{ runner.os }}-
 
       - name: Install deps
         run: pip install -r requirements.txt
 
-      - name: Run scraper, build report & send email
+      - name: Run semantic recommender, with legacy fallback
         env:
-          # GitHub Actions 自动提供的短期 token，无需维护个人 PAT
           TOKEN: ${{ github.token }}
-
-          # Gmail SMTP：仅 App Password 需要放到 Secret
           SMTP_HOST: smtp.gmail.com
           SMTP_PORT: '465'
           SMTP_USERNAME: ismlyux@gmail.com
           SMTP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           SMTP_FROM: ismlyux@gmail.com
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
-
-          # 可选：关键词覆盖；未设置时继续使用 config.py 默认值
           INCLUDES: ${{ vars.INCLUDES }}
           EXCLUDES: ${{ vars.EXCLUDES }}
-        run: python main.py -t "${{ github.token }}"
+        run: |
+          set +e
+          python semantic_daily.py -t "${{ github.token }}"
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "[WARN] Semantic pipeline failed with status $status; using legacy keyword pipeline for today's delivery."
+            python main.py -t "${{ github.token }}"
+          fi
 
       - name: Commit & push updates
         if: always()
@@ -49,10 +61,13 @@ jobs:
           set -e
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add -- README.md Arxiv_Daily_Notice/
+          if [ -d semantic_results ]; then
+            git add -- semantic_results/
+          fi
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "Update arXiv daily $(date -u +'%Y-%m-%dT%H:%MZ')"
+            git commit -m "Update semantic arXiv daily $(date -u +'%Y-%m-%dT%H:%MZ')"
             git push
           fi
