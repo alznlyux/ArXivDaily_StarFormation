@@ -43,7 +43,7 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           SMTP_FROM: ${{ secrets.SMTP_FROM }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
-        run: python semantic_daily.py -t "${{ github.token }}"
+        run: python daily.py -t "${{ github.token }}"
 
       - name: Commit generated reports
         if: always()
