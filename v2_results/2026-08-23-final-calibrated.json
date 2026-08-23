@@ -1,13 +1,13 @@
 {
   "summary": {
-    "generated_utc": "2026-08-23T05:26:47Z",
+    "generated_utc": "2026-08-23T05:28:38Z",
     "source": "2026-08-23-zero-shot-reranked.json",
     "candidate_count": 454,
     "A": 3,
-    "B": 12,
+    "B": 11,
     "C": 42,
-    "SKIP": 397,
-    "promoted_by_scope": 4,
+    "SKIP": 398,
+    "promoted_by_scope": 3,
     "downgraded_by_scope": 4,
     "scope": "Galactic/local ISM and star formation primary; external CGM/high-z galaxy evolution/broad galaxy surveys secondary",
     "method": "SPECTER2 + domain gate + zero-shot NLI + stable group-scope calibration"
@@ -901,65 +901,6 @@
       "nli_reason": "zero-shot classification and object evidence are consistent",
       "pre_scope_priority": "B",
       "scope_reason": "stable-scope calibration leaves decision unchanged"
-    },
-    {
-      "id": "2608.18475",
-      "title": "A model for the enhanced production rate of early-type hypervelocity stars in the Galactic halo",
-      "abstract": "About twenty late B-type hypervelocity stars (HVSs) traveling faster than the Galactic escape velocity have been discovered in the Galactic halo, many of which were ejected from the Galactic center (GC). Recently, we have advocated that these HVSs most likely formed in the nuclear star cluster (NSC) $150$--$500\\, \\rm{Myr}$ ago and were predominantly ejected via the gravitational slingshot of a past intermediate-mass black hole (IMBH) orbiting the supermassive black hole (SMBH) Sgr~A$^{*}$. Here we explore the constraints of the production rate of young HVSs on the star formation region of the NSC. We propose that the young HVS progenitors are born in a lopsided eccentric disk that is comparable in radius to the NSC. By numerically tracking the orbital evolution of disk stars, we find that they undergo rapid angular momentum relaxation at formation due to eccentric disk instability, and that their slingshot interactions with the SMBH-IMBH binary at distances $\\simeq 100\\, \\rm{au}$ produce HVSs at a rate of $10^{-5}$--$10^{-4}\\, \\rm{yr}^{-1}$. The rate is expected to trace the disk formation history, increasing with the accumulation of disk stars and dropping rapidly after the star formation stopped at $150\\, \\rm{Myr}$ ago. The rate is consistent with the observation and orders of magnitude higher than that expected for an old relaxed population in the literature, enhanced due to the gravitational torque from the non-spherical GC potential and radial velocity anisotropies of the disk stars. Our results imply that young HVSs should have a distinct radial and angular distribution from old ones.",
-      "authors": [
-        "Chunyang Cao",
-        "F. K. Liu",
-        "Xian Chen",
-        "Shuo Li"
-      ],
-      "categories": [
-        "astro-ph.GA",
-        "astro-ph.HE"
-      ],
-      "primary_category": "astro-ph.GA",
-      "published": "2026-08-19T03:02:50Z",
-      "main_page": "https://arxiv.org/abs/2608.18475",
-      "pdf": "https://arxiv.org/pdf/2608.18475.pdf",
-      "current_keyword_selected": false,
-      "base_contrastive_priority": "C",
-      "priority": "B",
-      "gate_reason": "negative-domain match with weak ISM evidence",
-      "score": 60.4,
-      "best_positive_topic": "turbulence",
-      "best_positive_semantic": 0.7202,
-      "best_negative_topic": "planetary_disks_exoplanets",
-      "best_negative_semantic": 0.702,
-      "semantic_margin": 0.0182,
-      "positive_lexical": 0.2835,
-      "negative_lexical": 0.2835,
-      "domain_evidence_score": 1.5,
-      "title_domain_score": 0.0,
-      "domain_hits": [
-        "abstract:\\bstar formation\\b"
-      ],
-      "top_positive_topics": [
-        {
-          "topic": "turbulence",
-          "semantic_raw": 0.7202
-        },
-        {
-          "topic": "galactic_ism_surveys",
-          "semantic_raw": 0.7012
-        },
-        {
-          "topic": "astrochemistry",
-          "semantic_raw": 0.7001
-        }
-      ],
-      "pre_nli_priority": "SKIP",
-      "zero_shot_positive_label": null,
-      "zero_shot_positive_score": null,
-      "zero_shot_negative_label": null,
-      "zero_shot_negative_score": null,
-      "zero_shot_ism_share": null,
-      "nli_reason": "not evaluated: safely outside semantic/domain shortlist",
-      "pre_scope_priority": "SKIP",
-      "scope_reason": "stable-scope rescue: explicit Galactic/local ISM object in title/abstract"
     },
     {
       "id": "2608.13734",
@@ -3665,6 +3606,65 @@
       "zero_shot_ism_share": 0.3251,
       "nli_reason": "zero-shot classifier leaves the paper as a boundary candidate",
       "pre_scope_priority": "C",
+      "scope_reason": "stable-scope calibration leaves decision unchanged"
+    },
+    {
+      "id": "2608.18475",
+      "title": "A model for the enhanced production rate of early-type hypervelocity stars in the Galactic halo",
+      "abstract": "About twenty late B-type hypervelocity stars (HVSs) traveling faster than the Galactic escape velocity have been discovered in the Galactic halo, many of which were ejected from the Galactic center (GC). Recently, we have advocated that these HVSs most likely formed in the nuclear star cluster (NSC) $150$--$500\\, \\rm{Myr}$ ago and were predominantly ejected via the gravitational slingshot of a past intermediate-mass black hole (IMBH) orbiting the supermassive black hole (SMBH) Sgr~A$^{*}$. Here we explore the constraints of the production rate of young HVSs on the star formation region of the NSC. We propose that the young HVS progenitors are born in a lopsided eccentric disk that is comparable in radius to the NSC. By numerically tracking the orbital evolution of disk stars, we find that they undergo rapid angular momentum relaxation at formation due to eccentric disk instability, and that their slingshot interactions with the SMBH-IMBH binary at distances $\\simeq 100\\, \\rm{au}$ produce HVSs at a rate of $10^{-5}$--$10^{-4}\\, \\rm{yr}^{-1}$. The rate is expected to trace the disk formation history, increasing with the accumulation of disk stars and dropping rapidly after the star formation stopped at $150\\, \\rm{Myr}$ ago. The rate is consistent with the observation and orders of magnitude higher than that expected for an old relaxed population in the literature, enhanced due to the gravitational torque from the non-spherical GC potential and radial velocity anisotropies of the disk stars. Our results imply that young HVSs should have a distinct radial and angular distribution from old ones.",
+      "authors": [
+        "Chunyang Cao",
+        "F. K. Liu",
+        "Xian Chen",
+        "Shuo Li"
+      ],
+      "categories": [
+        "astro-ph.GA",
+        "astro-ph.HE"
+      ],
+      "primary_category": "astro-ph.GA",
+      "published": "2026-08-19T03:02:50Z",
+      "main_page": "https://arxiv.org/abs/2608.18475",
+      "pdf": "https://arxiv.org/pdf/2608.18475.pdf",
+      "current_keyword_selected": false,
+      "base_contrastive_priority": "C",
+      "priority": "SKIP",
+      "gate_reason": "negative-domain match with weak ISM evidence",
+      "score": 60.4,
+      "best_positive_topic": "turbulence",
+      "best_positive_semantic": 0.7202,
+      "best_negative_topic": "planetary_disks_exoplanets",
+      "best_negative_semantic": 0.702,
+      "semantic_margin": 0.0182,
+      "positive_lexical": 0.2835,
+      "negative_lexical": 0.2835,
+      "domain_evidence_score": 1.5,
+      "title_domain_score": 0.0,
+      "domain_hits": [
+        "abstract:\\bstar formation\\b"
+      ],
+      "top_positive_topics": [
+        {
+          "topic": "turbulence",
+          "semantic_raw": 0.7202
+        },
+        {
+          "topic": "galactic_ism_surveys",
+          "semantic_raw": 0.7012
+        },
+        {
+          "topic": "astrochemistry",
+          "semantic_raw": 0.7001
+        }
+      ],
+      "pre_nli_priority": "SKIP",
+      "zero_shot_positive_label": null,
+      "zero_shot_positive_score": null,
+      "zero_shot_negative_label": null,
+      "zero_shot_negative_score": null,
+      "zero_shot_ism_share": null,
+      "nli_reason": "not evaluated: safely outside semantic/domain shortlist",
+      "pre_scope_priority": "SKIP",
       "scope_reason": "stable-scope calibration leaves decision unchanged"
     },
     {

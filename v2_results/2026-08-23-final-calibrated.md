@@ -1,16 +1,16 @@
 # ISM Literature Recommender v2.6 — Final Calibrated Benchmark
 
-Generated: 2026-08-23T05:26:47Z
+Generated: 2026-08-23T05:28:38Z
 Source: `2026-08-23-zero-shot-reranked.json`
 
 ## Summary
 
 - Candidates: **454**
 - A: **3**
-- B: **12**
+- B: **11**
 - C: **42**
-- SKIP: **397**
-- Scope promotions: **4**
+- SKIP: **398**
+- Scope promotions: **3**
 - Scope downgrades: **4**
 
 ## A/B candidates
@@ -99,13 +99,6 @@ Source: `2026-08-23-zero-shot-reranked.json`
 - **Scope:** B → B — stable-scope calibration leaves decision unchanged
 - **Abstract:** Extinction significantly affects open cluster parameters and their use in studies of Galactic structure, yet homogeneous large sample measurements of open cluster extinction properties remain limited. Using Gaia-era open cluster member samples combined with multi-band photometry and stellar parameters, we derive color excesses of member stars and provide the homogeneous characterization of the mean reddening, differential reddening, and color excess ratio (CER) at the cluster scale. Differential reddening increases systematically with mean reddening, with highly reddened clusters near the Galactic plane showing stronger extinction variations. Star-by-star reddening corrections narrow color--magnitude diagram (CMD) sequences in 369 of 435 clusters (85%) with reliable CMD-width measurements, and cluster color excess maps reveal small-scale extinction structures. The median CER is compatible with the standard diffuse interstellar medium extinction curve, while the broad CER distribution and its large-scale variations across the Galactic disk likely reflect differences in the dominant dust environments sampled along different Galactic sight lines.
 
-### [B] 60.4 — A model for the enhanced production rate of early-type hypervelocity stars in the Galactic halo
-- **arXiv:** [2608.18475](https://arxiv.org/abs/2608.18475)
-- **Primary:** astro-ph.GA
-- **Topic:** `turbulence`
-- **Scope:** SKIP → B — stable-scope rescue: explicit Galactic/local ISM object in title/abstract
-- **Abstract:** About twenty late B-type hypervelocity stars (HVSs) traveling faster than the Galactic escape velocity have been discovered in the Galactic halo, many of which were ejected from the Galactic center (GC). Recently, we have advocated that these HVSs most likely formed in the nuclear star cluster (NSC) $150$--$500\, \rm{Myr}$ ago and were predominantly ejected via the gravitational slingshot of a past intermediate-mass black hole (IMBH) orbiting the supermassive black hole (SMBH) Sgr~A$^{*}$. Here we explore the constraints of the production rate of young HVSs on the star formation region of the NSC. We propose that the young HVS progenitors are born in a lopsided eccentric disk that is comparable in radius to the NSC. By numerically tracking the orbital evolution of disk stars, we find that they undergo rapid angular momentum relaxation at formation due to eccentric disk instability, and that their slingshot interactions with the SMBH-IMBH binary at distances $\simeq 100\, \rm{au}$ produce HVSs at a rate of $10^{-5}$--$10^{-4}\, \rm{yr}^{-1}$. The rate is expected to trace the disk formation history, increasing with the accumulation of disk stars and dropping rapidly after the star formation stopped at $150\, \rm{Myr}$ ago. The rate is consistent with the observation and orders of magnitude higher than that expected for an old relaxed population in the literature, enhanced due to the gravitational torque from the non-spherical GC potential and radial velocity anisotropies of the disk stars. Our results imply that young HVSs should have a distinct radial and angular distribution from old ones.
-
 ### [B] 59.3 — The CMZ Asymmetries: Feeding or Feedback?
 - **arXiv:** [2608.13734](https://arxiv.org/abs/2608.13734)
 - **Primary:** astro-ph.GA
@@ -123,7 +116,6 @@ Source: `2026-08-23-zero-shot-reranked.json`
 ## Scope changes
 
 - **C → B** — High Velocity Neutral Gas in the Fermi Bubbles: New Kinematic Limits and Spatial Structure — stable-scope rescue: explicit Galactic/local ISM object in title/abstract — [2608.16754](https://arxiv.org/abs/2608.16754)
-- **SKIP → B** — A model for the enhanced production rate of early-type hypervelocity stars in the Galactic halo — stable-scope rescue: explicit Galactic/local ISM object in title/abstract — [2608.18475](https://arxiv.org/abs/2608.18475)
 - **C → B** — The CMZ Asymmetries: Feeding or Feedback? — stable-scope rescue: explicit Galactic/local ISM object in title/abstract — [2608.13734](https://arxiv.org/abs/2608.13734)
 - **SKIP → B** — X-ray thread/Nonthermal Radio Filament associations: Evidence for Interstellar Magnetic Reconnection — stable-scope rescue: explicit Galactic/local ISM object in title/abstract — [2608.14830](https://arxiv.org/abs/2608.14830)
 - **B → C** — Diffuse HI emission in the circumgalactic medium of NGC891 and NGC4565 - III: azimuthal profiles — stable-scope cap: external-galaxy CGM rather than Galactic/local ISM — [2608.19186](https://arxiv.org/abs/2608.19186)
