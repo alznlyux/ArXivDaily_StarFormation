@@ -1,5 +1,5 @@
 # coding: utf-8
-"""Small GitHub Issues helper used by the daily workflow."""
+"""Small GitHub Issues helper used by AstroBrief."""
 from __future__ import annotations
 
 import os
@@ -14,13 +14,13 @@ def _repository() -> tuple[str, str]:
         owner, repo = full_name.split("/", 1)
         return owner, repo
 
-    owner = os.environ.get("ARXIV_DAILY_REPO_OWNER", "").strip()
-    repo = os.environ.get("ARXIV_DAILY_REPO_NAME", "").strip()
+    owner = os.environ.get("ASTROBRIEF_REPO_OWNER", "").strip()
+    repo = os.environ.get("ASTROBRIEF_REPO_NAME", "").strip()
     if owner and repo:
         return owner, repo
     raise RuntimeError(
         "Repository is not configured. Run inside GitHub Actions or set "
-        "ARXIV_DAILY_REPO_OWNER and ARXIV_DAILY_REPO_NAME."
+        "ASTROBRIEF_REPO_OWNER and ASTROBRIEF_REPO_NAME."
     )
 
 
@@ -32,7 +32,7 @@ def make_github_issue(
     labels: list[str] | None = None,
     TOKEN: str = "",
 ) -> bool:
-    """Create an issue without making issue failures fatal to email delivery."""
+    """Create an issue without making issue failures fatal to delivery."""
     if not TOKEN:
         print("[WARN] GitHub token is unavailable; skip issue creation")
         return False
@@ -68,7 +68,12 @@ def make_github_issue(
         if closed:
             issue_url = response.json().get("url")
             if issue_url:
-                requests.patch(issue_url, json={"state": "closed"}, headers=headers, timeout=30)
+                requests.patch(
+                    issue_url,
+                    json={"state": "closed"},
+                    headers=headers,
+                    timeout=30,
+                )
         return True
 
     print(f'[WARN] Could not create issue "{title}": {response.status_code} {response.text}')
