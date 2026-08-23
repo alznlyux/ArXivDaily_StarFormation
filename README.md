@@ -1,85 +1,130 @@
-# Showing new listings for Friday, 21 August 2026
-Auto update Star Formation & Molecular Cloud papers at about 2:30am UTC (10:30am Beijing time) every weekday.
+# ArXivDaily ISM
 
+A free, automated arXiv recommender for interstellar-medium and star-formation research.
 
-阅读 `Usage.md`了解如何使用此repo实现个性化的Arxiv论文推送
+The project retrieves the latest `astro-ph` submissions, ranks them semantically, archives the scored candidate pool, creates a GitHub Issue, and can email the recommended papers to a research group. It runs entirely in GitHub Actions and does not require a paid model API or a continuously running local computer.
 
-See `Usage.md` for instructions on how to personalize the repo. 
+## What it does
 
+1. Fetches recent `astro-ph` submissions through the official arXiv Atom API.
+2. Uses **SPECTER2** scientific embeddings to compare each title + abstract with configurable research topics.
+3. Contrasts relevant topics against explicit non-target astronomy domains to reduce false positives.
+4. Uses a small local **zero-shot NLI** model to re-check ambiguous candidates.
+5. Applies domain and scope guards for ISM / molecular-cloud / star-formation research.
+6. Assigns each paper a priority:
+   - **A** — strong recommendation
+   - **B** — recommended
+   - **C** — boundary candidate, archived for auditing
+   - **SKIP** — screened out
+7. Writes the daily report and full score archive to the repository.
+8. Optionally sends the A/B recommendations by email.
 
-Keyword list: ['star formation', 'molecular cloud', 'interstellar medium', 'dust', 'cloud', 'clump', 'core', 'filament', 'atomic gas', 'H$_2$', 'HI', 'N-PDF', 'bubble', 'shell', 'feedback', 'jet', 'outflow', 'protostar']
+## Main files
 
+- `daily.py` — standalone production entry point.
+- `semantic_daily.py` — arXiv ingestion, report generation, and email helpers.
+- `semantic_recommender.py` — semantic ranking and scope-classification engine.
+- `semantic_topics.json` — research-scope configuration.
+- `semantic_smoke_test.py` — regression / smoke tests.
+- `github_issue.py` — repository-independent GitHub Issue helper.
+- `.github/workflows/daily_arxiv.yml` — scheduled production workflow.
+- `.github/workflows/semantic_production_test.yml` — CI smoke test.
 
-Excluded: ['galaxies', 'galaxy clusters', 'AGN', 'black hole', 'lensing', 'dark matter', 'dark energy', 'fast radio burst', 'pulsar', 'neutron star', 'white dwarf', 'AGB', ' z ', 'lightcurve']
+Generated outputs:
 
+- `LATEST.md` — latest human-readable recommendation report.
+- `Arxiv_Daily_Notice/` — dated report archive.
+- `semantic_results/` — full daily scoring results in JSON.
 
-### Today: 7papers 
-#### Title:
-          Substructure evolution from protoplanetary to debris disks driven by mutually gravitating planetesimals and implications on Kepler resonances and free-floating planets
- - **Authors:** Yinuo Han, Konstantin Batygin, Fei Dai
- - **Subjects:** Subjects:
-Earth and Planetary Astrophysics (astro-ph.EP); Solar and Stellar Astrophysics (astro-ph.SR)
-- **Arxiv link:** [https://arxiv.org/abs/2608.19329](https://arxiv.org/abs/2608.19329)
-- **Pdf link:** [https://arxiv.org/pdf/2608.19329.pdf](https://arxiv.org/pdf/2608.19329.pdf)
-- **Abstract**
- Motivated by recent observations suggesting rings found in debris disks are wider than those in protoplanetary disks, we consider a picture in which planetesimals formed in radially narrow dust traps radially diffuse into debris rings via mutual scattering. Under this picture, evolving the fractional widths ($\Delta r/r$) of resolved debris rings back to a few Myr according to the theoretical $t^{1/5}$ evolutionary trajectory reproduces the protoplanetary ring distribution. We inferred the product of the ring mass and individual planetesimal mass required to reach the observed debris ring widths at their ages, finding that $M_\mathrm{disk}\times m$ ranges from $10^{-3}$ to $10^{3} \, M_\oplus^2$. The distribution of $M_\mathrm{disk} \times m$ appears to correlate with the stellar mass, peaking at 1.5 to 2 $M_\odot$, which resembles the stellar mass dependence of the giant exoplanet occurrence rate. The population of resolved debris rings lie close to the $\Delta r / r = 10 \, h$ equipartition relation expected of a planetesimal ring that formed narrow, with typical resolved debris disks still expected to be broadening radially and vertically at present. If sufficiently massive ($\sim$10 $M_\oplus$), this radial broadening can send a few Mercurys to the terrestrial region within 10 Myr, making debris disks a plausible source of planetesimals disrupting resonant chains among Kepler planets. Within Gyr timescales, outer planetesimal belts can also eject $\sim$1% of their mass into interstellar space if they consist of Moon-sized bodies or above, suggesting that the slow and steady intrinsic evolution of massive debris disks could contribute to the interstellar free-floating population of terrestrial-planet-sized bodies.
-#### Title:
-          ALMA high resolution observations of Betelgeuse: Persistent structure spanning the inner atmosphere
- - **Authors:** W.R.F. Dent, A.M.S. Richards, G.M. Harper, L.D. Matthews, E. O'Gorman
- - **Subjects:** Subjects:
-Solar and Stellar Astrophysics (astro-ph.SR)
-- **Arxiv link:** [https://arxiv.org/abs/2608.19339](https://arxiv.org/abs/2608.19339)
-- **Pdf link:** [https://arxiv.org/pdf/2608.19339.pdf](https://arxiv.org/pdf/2608.19339.pdf)
-- **Abstract**
- The extended atmosphere of red supergiants (RSGs) forms an important link in the process of mass loss and the subsequent enrichment of the interstellar medium. Large-scale convection is thought to play a significant role, which is likely to result in irregularities in the surface. High resolution, high contrast sub-mm images of Betelgeuse - one of the closest RSGs - are used to probe the structure and temporal stability of the inner 1-2$R_\star$ of its atmosphere. Using ALMA in the longest baseline configuration, continuum emission and lines of SiO and CO and their isotopomers were observed at $\lambda$0.6-1.4mm, giving beamwidths down to 7mas at the shortest wavelengths. These were compared with a similar observation taken at 0.9mm approximately 7 years earlier. The observed continuum emission arises mostly from an optically-thick mm/sub-mm photosphere of radius 1.1-1.3$R_\star$ with a relatively constant temperature of $\sim$2300K, but with two hotter patches to the NE and SW. The brightest of these has a temperature enhancement of $\sim$800K, and its location and intensity appears relatively unchanged since the 2015 observation. The sub-mm photosphere shows deviations of up to $\pm$ 6% in radius, with weaker continuum extending out to $\sim$2.5$R_\star$ - similar to the extent of clumpy emission in SiO and CO. The hot regions of gas and deviations from radial symmetry are thought to be associated with active shocks driven by underlying convective cells, although their lifetimes appear longer than model predictions. They lie near the proposed poles of the star, which might suggest enhanced and relatively stable polar convection. The present data show no clear evidence for stellar rotation in the extended line emission or absorption against the photosphere, although the structure of the gas emission has changed significantly since 2015.
-#### Title:
-          Early Planet Formation in Embedded Disks (eDisk). XXIV: Systematic Investigation of Disk Structures based on Visibility Analysis
- - **Authors:** Mayank Narang, Jerry Xu, Leslie W. Looney, Nagayoshi Ohashi, Anika Khandavalli, Patrick Sheehan, Jonathan P. Williams, Shigehisa Takakuwa, Jes K. Jørgensen, Ilseung Han, Woojin Kwon, Zhi-Yun Li, Nguyen Thi Phuong, John J. Tobin
- - **Subjects:** Subjects:
-Solar and Stellar Astrophysics (astro-ph.SR); Earth and Planetary Astrophysics (astro-ph.EP); Astrophysics of Galaxies (astro-ph.GA)
-- **Arxiv link:** [https://arxiv.org/abs/2608.19364](https://arxiv.org/abs/2608.19364)
-- **Pdf link:** [https://arxiv.org/pdf/2608.19364.pdf](https://arxiv.org/pdf/2608.19364.pdf)
-- **Abstract**
- The dust continuum emission from young protostellar disks encodes key information about their mass distribution and early evolution, yet uniform high-resolution comparative studies remain limited. We present a systematic uv-plane analysis of parametric intensity models applied to ALMA Band-6 (1.3 mm) observations of 23 disks (19 protostellar systems with 4 being in binary) from the eDisk sample, spanning Gaussian profiles to power-law cores with exponential tails (PLCT), including asymmetric extensions. Gaussian models generally fail to reproduce the centrally peaked emission and extended outer structure observed in most disks, whereas the PLCT framework provides a significantly improved description of radial brightness profiles. Incorporating azimuthal asymmetries further reduces residuals in 15 of 17 inclined disks, indicating that departures from axisymmetry are common at early stages. Only two disks, L1489 IRS and Oph IRS63, exhibit clear gap and ring substructures, while most appear smooth at the spatial resolution and sensitivity of our observations. These systems are among the most evolved in the sample, and the absence of flat-spectrum sources limits the evolutionary range probed, {suggesting that the detection of prominent gaps and rings is not common} in the earliest phases of disk evolution. Using a uniform definition of disk radius based on the 95\% enclosed flux, we find a positive correlation with stellar mass, $R_{\rm disk} \propto M_{\star}^{1.5 \pm 0.1}$, with disks in binary systems systematically smaller than those around isolated protostars. While the models capture overall morphology and large-scale asymmetries, distinguishing intrinsic structures from radiative transfer effects in optically thick regions remains challenging.
-#### Title:
-          Responses of the X-ray spectrometer/imager STIX onboard Solar Orbiter
- - **Authors:** Hualin Xiao, Olivier Limousin, Ewan Dickson, Säm Krucker
- - **Subjects:** Subjects:
-Solar and Stellar Astrophysics (astro-ph.SR); Instrumentation and Methods for Astrophysics (astro-ph.IM)
-- **Arxiv link:** [https://arxiv.org/abs/2608.19420](https://arxiv.org/abs/2608.19420)
-- **Pdf link:** [https://arxiv.org/pdf/2608.19420.pdf](https://arxiv.org/pdf/2608.19420.pdf)
-- **Abstract**
- Solar flares are explosive events that release X-rays from hot plasma and accelerated electrons. The STIX instrument on the Solar Orbiter provides imaging spectroscopy of solar X-ray emissions from 4 to 150 keV. To interpret the STIX data accurately, understanding the instrument's response is crucial. Given the complexity of interactions of X-rays with the instrument, we developed a detailed Monte Carlo model for STIX based on Geant4. The model accurately depicts the instrument's components, such as grids, detectors, X-ray windows, and collimators, with their responses. We studied various effects, including grid shadowing, fluorescent X-rays emitted by materials in STIX, and grid transmission, to assess their impacts on STIX's scientific goals. Model validation was performed using Crab Nebula observations, a standard calibration source that provides reliable ground truth for X-ray instruments. Our simulations align with the Crab Nebula observations within the uncertainties, thereby validating the accuracy of the Geant4 model and showcasing its potential for interpreting STIX data. With the help of the generated response matrices, which are indispensable for solar spectroscopy, we discuss the applications and limitations of the model for future STIX data analysis.
-#### Title:
-          Toward Operational Solar Flare Peak Flux Nowcasting: A Strategy Combining Real-Time Data, Machine Learning, and NOAA Flare Detection Criteria
- - **Authors:** Kangwoo Yi, Qin Li, Haodi Jiang, Meiqi Wang, Haimin Wang, Bo Shen
- - **Subjects:** Subjects:
-Solar and Stellar Astrophysics (astro-ph.SR)
-- **Arxiv link:** [https://arxiv.org/abs/2608.20062](https://arxiv.org/abs/2608.20062)
-- **Pdf link:** [https://arxiv.org/pdf/2608.20062.pdf](https://arxiv.org/pdf/2608.20062.pdf)
-- **Abstract**
- We present the RMN strategy (Real-time data, machine learning, and NOAA flare detection criteria) for nowcasting the peak soft X-ray flux of ongoing solar flares under operationally realistic conditions. The strategy combines real-time GOES 0.1-0.8 nm X-ray observations with an attention-based sequence-to-sequence Long Short-Term Memory model. Under the NOAA flare detection criteria, predictions are evaluated at one-minute intervals from three minutes after the cataloged onset to the observed peak using the preceding 60 minutes of X-ray observations. We apply the RMN strategy to C-, M-, and X-class flares observed by GOES-8-18 from 1997 to 2024 using four-fold cross-validation. The major results of this study are as follows. First, the model nowcasts peak soft X-ray flux with RMSE and PE values of 0.26 and 3.11\% for the $\geq$C-class group, 0.45 and 5.59\% for the $\geq$M-class group, and 0.87 and 12.76\% for the X-class group. The higher discrepancy toward stronger flare groups indicates that peak-flux prediction is more challenging for higher-intensity flares. Second, the model performance depends on flare rise time and prediction time, with larger errors for longer rise time events and improved performance as the prediction time approaches the flare peak. Shorter rise time events approach their final peak more rapidly, providing a clearer indication of the eventual peak, whereas the larger difference for longer rise time events may partly reflect more complex temporal evolution. Third, empirical coverage based on total uncertainty remains high but decreases for stronger flares, with noise uncertainty contributing more than model uncertainty.
-#### Title:
-          ALOHA IRDCs Molecular Line Follow-up: I. Gas properties and kinematics
- - **Authors:** Jinjin Xie, Yaoting Yan, Zhiyuan Ren, Jarken Esimbek, Di Li, Yan Duan, Gary A. Fuller, Nicolas Peretto, Jingwen Wu, Wenjin Yang, Christian Henkel, Xuepeng Chen, Qianru He, Yongxiong Wang, Keping Qiu, Ningyu Tang, Sijia Peng, Chao-Wei Tsai, Pham Ngoc Diep, Hauyu Baobab Liu, Busaba Kramer, Kee-Tae Kim, Ken'ichi Tatematsu, Mark G. Rawlings, Maria Jesus Jimenez Donaire, Gan Luo, Xin Lyu, Jiawei Liu, Yuchen Xing, Sheng-yuan Liu, Koichiro Sugiyama, Ram K. Yadav, Willem A. Baan, Gordon Macleod, Patricio Sanhueza, Long-Fei Chen, Chang Won Lee, Yang Su, Chen Wang, Ruili Wang, Ruilin Xia, Andrej Sobolev, Dmitry A. Ladeyschikov, David Eden, Woojin Kwon, Fengwei Xu, Hongjun Ma, Daniel Harsono, Sihan Jiao, Rowan Smith, Ke Wang, Tie Liu, Guangxing Li, Xin Guan, Yuxin He, Dalei Li, Xindi Tang, Chunsheng Luo, Jianjun Zhou, Kitiyanee Asanok, Dan Bintley, Huei-Ru Vivien Chen, En Chen, Chakali Eswaraiah, Ana Duarte-Cabral, Siyi Feng, Ray S. Furuya, Tomoya Hirota, Ernar Imanaly, Xue-Jian Jiang, Qaynar Jandaolet, Abay Jengis, Weiguang Ji, Yi-Jehng Kuan, Min-Young Lee, Chong Li, Cuihuan Li, Guodong Li, Hua-bai Li, Jiasheng Li, Yujie Li, Mengting Liu, Kuan-Yu Liu, Shu Liu, Rong Liu, Yongquan Luo, Yingxiu Ma, Steve Mairs, Fumitaka Nakamura, Harriet Parsons, Jaime Pineda, Hailiang Shen, Mingke Sun, Serikbek Sailanbek, Nurzhan Shaimoldin, Ya-Wen Tang, Antneh Gashaye Tegegne, Kadirya Tursun, Glenn J. White, Gang Wu
- - **Subjects:** Subjects:
-Astrophysics of Galaxies (astro-ph.GA); Solar and Stellar Astrophysics (astro-ph.SR)
-- **Arxiv link:** [https://arxiv.org/abs/2608.20238](https://arxiv.org/abs/2608.20238)
-- **Pdf link:** [https://arxiv.org/pdf/2608.20238.pdf](https://arxiv.org/pdf/2608.20238.pdf)
-- **Abstract**
- Infrared Dark Clouds are ideal sites for investigating the initial conditions of massive star and cluster formation. The A Lei Of the Habitat and Assembly of Infrared Dark Clouds (ALOHA IRDCs), a James Clerk Maxwell Telescope (JCMT) Large Program, has mapped nearby IRDCs with SCUBA-2. Complementary molecular line observations are needed to characterise the physical, kinematic, and chemical properties of the dense gas. We aim to determine the thermal, kinematic, and chemical properties of clumps identified in the ALOHA IRDCs, and to assess their evolutionary status and level of star-forming activity. We performed single-pointing K-band and W-band observations towards 56 ALOHA IRDCs clumps using the Effelsberg 100-m and Yebes 40-m telescopes, respectively. We derived NH3 kinetic temperatures using the hyperfine group ratio (HFGR) method and identified infall and shock signatures from HCO+, H13CO+, SiO, and HNCO profiles. Water masers and NH2D emission were used as complementary tracers of chemical evolution and star formation. The clumps exhibit kinetic temperatures of 15-29 K. We detect NH2D emission towards 18 sources, with NH2D centroid velocities consistent with NH3, indicating both species trace the same dense gas component. More than half of the clumps display blue-asymmetric HCO+ profiles, identifying them as infall candidates. Water masers are detected in 22 sources, with prominent velocity ranges and variability. Broad SiO emission (>~20 km/s) indicates strong shocks, while narrower extents (<~6km/s) likely trace large-scale interactions or low-velocity shocks. The widespread infall signatures, shock tracers, masers, and NH2D emission suggest that relatively quiescent, chemically young material can coexist with dynamically active gas affected by early protostellar feedback, providing insight into the coupled physical and chemical evolution of massive IRDC clumps.
-#### Title:
-          The Nearby Star Formation and Supernova Histories Reconstructed from Young Star Clusters
- - **Authors:** Cameren Swiggum, Catherine Zucker, Michelangelo Pantaleoni González, Emily L. Hunt, Robert A. Benjamin, Sebastian Hutschenreuter, Alena K. Rottensteiner, Efrem Maconi, Lewis McCallum, João Alves, Sebastian Ratzenböck
- - **Subjects:** Subjects:
-Astrophysics of Galaxies (astro-ph.GA)
-- **Arxiv link:** [https://arxiv.org/abs/2608.20307](https://arxiv.org/abs/2608.20307)
-- **Pdf link:** [https://arxiv.org/pdf/2608.20307.pdf](https://arxiv.org/pdf/2608.20307.pdf)
-- **Abstract**
- We reconstruct the recent star formation and core-collapse supernova (ccSN) histories of the Solar Neighborhood from the past trajectories of young star clusters. Using a \textit{Gaia}-based cluster sample with newly derived ages, masses, and bulk 3D velocities, we integrate orbits backward in an assumed axisymmetric Galactic potential and combine the trajectories with IMF sampling and stellar lifetimes to infer ccSN times and locations over the past 50 Myr. The result is an all-sky, 3D, time-resolved map of nearby ccSN activity for comparison with high-resolution 3D views of the local interstellar medium. The 0--15 Myr map shows strong enhancements toward Orion, Vela, Sco--Cen, and Cepheus, many within present-day cavities and shells. At earlier times, the dominant enhancements trace the Collinder 135, Messier 6, and Alpha Persei cluster families, showing how the remnants of massive star-forming complexes have shaped the recent local feedback history. We recover a bursty star formation history followed by a delayed, smoother ccSN history. Over the last 40 Myr, the mean star formation and ccSN rates are \(823~M_\odot~\mathrm{Myr}^{-1}\) and \(7.7~\mathrm{Myr}^{-1}\), respectively, corresponding to a Milky Way rate of \(0.55\pm0.03~\mathrm{century}^{-1}\). Present-day OB-star catalogs yield rates ranging from agreement with the cluster reconstruction to several times higher. Because the catalogs overlap weakly and require different corrections, we do not rescale the ccSN map. Our reconstruction provides an empirical framework for connecting the recent history of massive-star feedback to the 3D structure and life cycle of gas in the nearby Milky Way.
+## Quick start
 
+### 1. Create your own repository
 
-by Al.Zn (Xin Lyu). 
+Create a new GitHub repository and copy this standalone project into it. GitHub Actions will automatically detect the repository owner and repository name; no source-code edits are required for that.
 
+### 2. Configure research interests
 
-2026-08-22
+Edit `semantic_topics.json`.
+
+The configuration contains positive research topics, lexical cues, negative/background domains, and group-scope information. Topic descriptions should describe the science you actually want to receive rather than just list isolated keywords.
+
+The default configuration is tuned for Galactic/local ISM, molecular clouds, cold atomic and molecular gas, dense structures, star formation, turbulence, magnetic fields, feedback, chemistry, and related observational work.
+
+### 3. Configure email delivery (optional)
+
+In **Settings → Secrets and variables → Actions**, add these repository secrets:
+
+| Secret | Meaning |
+| --- | --- |
+| `SMTP_USERNAME` | SMTP login / sending account |
+| `SMTP_PASSWORD` | SMTP password or app password |
+| `SMTP_FROM` | From address |
+| `EMAIL_TO` | Recipient address(es) |
+
+The supplied workflow uses Gmail SMTP (`smtp.gmail.com`, port `465`). For Gmail, use an App Password rather than the normal account password.
+
+If SMTP secrets are omitted, the recommender can still run and archive results on GitHub.
+
+### 4. Enable GitHub Actions
+
+The default workflow runs on weekdays at **09:30 Beijing time (UTC 01:30)** and also supports manual runs through **Actions → arXiv ISM Daily → Run workflow**.
+
+To use another schedule, edit the cron expression in `.github/workflows/daily_arxiv.yml`.
+
+### 5. Run a production test
+
+The repository includes a smoke-test workflow and `semantic_smoke_test.py`. Run the test before changing model names, thresholds, or the topic configuration substantially.
+
+## Models
+
+The default system uses:
+
+- Scientific embeddings: `allenai/specter2_base` with SPECTER2 adapters.
+- Ambiguous-case classification: `cross-encoder/nli-deberta-v3-xsmall`.
+
+Models are downloaded from Hugging Face and cached by GitHub Actions. The first run is therefore heavier than later runs.
+
+## Design principles
+
+### Semantic recommendation instead of substring matching
+
+A paper is evaluated from its title, abstract, categories, domain evidence, semantic similarity, contrast with non-target domains, and ambiguous-case NLI score. This is intended to catch relevant cross-listed papers while avoiding papers that happen to contain generic words such as *shock*, *turbulence*, *feedback*, or *magnetic field* in an unrelated context.
+
+### Stable research scope
+
+This project does not retrain a model every day. The main personalization layer is the stable research-scope definition in `semantic_topics.json`. For a research group with reasonably stable interests, it should need only occasional review.
+
+### Auditable results
+
+A/B papers are the recommendations. C papers and the complete scored candidate pool are retained so false positives, false negatives, and threshold choices can be inspected later.
+
+## Local use
+
+Python 3.11 is recommended.
+
+```bash
+pip install -r requirements.txt
+python semantic_smoke_test.py
+python daily.py
+```
+
+Without GitHub or SMTP credentials, local runs can still be used to test retrieval and scoring; delivery steps that lack credentials are skipped.
+
+## Customization ideas
+
+The current project is deliberately simple enough to maintain in a research group. Useful extensions include:
+
+- separate topic profiles for different group members;
+- per-recipient recommendation emails;
+- representative-paper prototypes;
+- explicit thumbs-up / thumbs-down feedback;
+- weekly digests in addition to daily delivery;
+- HTML report pages or a lightweight dashboard.
+
+## Project status
+
+The semantic recommender, arXiv Atom ingestion, GitHub Actions automation, score archiving, and SMTP delivery have been exercised in production on the original development repository. This `standalone-v1` branch is the cleaned, repository-independent release candidate intended for migration into a fresh non-fork repository.
+
+## Acknowledgements
+
+The recommender relies on arXiv metadata, Hugging Face model hosting, AllenAI SPECTER2, open-source Transformers/Adapters tooling, and GitHub Actions.
