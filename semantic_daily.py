@@ -1,11 +1,9 @@
 # coding: utf-8
+"""arXiv ingestion, reporting, scope guards, and email helpers for AstroBrief."""
 from __future__ import annotations
 
-import argparse
 import datetime as dt
-import json
 import os
-import pathlib
 import re
 import smtplib
 import ssl
@@ -15,9 +13,6 @@ from email.message import EmailMessage
 import markdown
 import requests
 
-from github_issue import make_github_issue
-from semantic_recommender import score_papers
-
 
 ARXIV_API = "https://export.arxiv.org/api/query"
 ATOM = "{http://www.w3.org/2005/Atom}"
@@ -26,6 +21,17 @@ ARXIV = "{http://arxiv.org/schemas/atom}"
 
 def _clean(text: str) -> str:
     return re.sub(r"\s+", " ", text or "").strip()
+
+
+def _user_agent() -> str:
+    """Build a descriptive User-Agent without hard-coding one repository."""
+    repository = os.environ.get("GITHUB_REPOSITORY", "").strip()
+    contact = os.environ.get("ASTROBRIEF_CONTACT", "").strip()
+    if repository:
+        return f"AstroBrief/1.0 (+https://github.com/{repository})"
+    if contact:
+        return f"AstroBrief/1.0 ({contact})"
+    return "AstroBrief/1.0"
 
 
 def _fetch_arxiv_day(day: dt.date) -> list[dict]:
@@ -39,10 +45,12 @@ def _fetch_arxiv_day(day: dt.date) -> list[dict]:
         "sortBy": "submittedDate",
         "sortOrder": "descending",
     }
-    headers = {
-        "User-Agent": "ArXivDaily-ISM/2.1 (+https://github.com/alznlyux/ArXivDaily_StarFormation)"
-    }
-    response = requests.get(ARXIV_API, params=params, headers=headers, timeout=120)
+    response = requests.get(
+        ARXIV_API,
+        params=params,
+        headers={"User-Agent": _user_agent()},
+        timeout=120,
+    )
     response.raise_for_status()
     root = ET.fromstring(response.content)
 
@@ -73,26 +81,28 @@ def _fetch_arxiv_day(day: dt.date) -> list[dict]:
         if not any(cat.startswith("astro-ph.") for cat in categories):
             continue
 
-        papers.append({
-            "id": paper_id,
-            "title": title,
-            "authors": authors,
-            "subjects": "; ".join(categories),
-            "categories": categories,
-            "primary_category": primary,
-            "abstract": abstract,
-            "main_page": f"https://arxiv.org/abs/{paper_id}",
-            "pdf": f"https://arxiv.org/pdf/{paper_id}.pdf",
-        })
+        papers.append(
+            {
+                "id": paper_id,
+                "title": title,
+                "authors": authors,
+                "subjects": "; ".join(categories),
+                "categories": categories,
+                "primary_category": primary,
+                "abstract": abstract,
+                "main_page": f"https://arxiv.org/abs/{paper_id}",
+                "pdf": f"https://arxiv.org/pdf/{paper_id}.pdf",
+            }
+        )
     return papers
 
 
 def fetch_daily_papers(max_lookback_days: int = 7) -> tuple[str, list[dict]]:
     """Return the most recent calendar day that has astro-ph submissions.
 
-    The official Atom API is used instead of scraping /list/astro-ph/new.  A
-    category query naturally includes astro-ph cross-lists, while revisions are
-    not duplicated as separate list-page replacement entries.
+    AstroBrief uses the official Atom API instead of scraping the HTML
+    /list/astro-ph/new page. A category query naturally includes astro-ph
+    cross-lists, while revisions are not treated as separate list-page entries.
     """
     today = dt.datetime.utcnow().date()
     last_error = None
@@ -111,7 +121,9 @@ def fetch_daily_papers(max_lookback_days: int = 7) -> tuple[str, list[dict]]:
         print(f"[INFO] No astro-ph submissions for {day}; checking previous day")
 
     if last_error is not None:
-        raise RuntimeError(f"No recent astro-ph day could be retrieved; last API error: {last_error}")
+        raise RuntimeError(
+            f"No recent astro-ph day could be retrieved; last API error: {last_error}"
+        )
     raise RuntimeError("No astro-ph submissions found in the lookback window")
 
 
@@ -138,10 +150,18 @@ def _true_galactic_ism_rescue(p: dict) -> bool:
         r"\b(?:neutral gas|neutral hydrogen|H\s*I\s+(?:clouds?|gas|emission|absorption|survey))\b",
         title,
     )
-    return fermi_hi or cmz_title or galactic_center_gas or interstellar_magnetic or explicit_hi_title
+    return (
+        fermi_hi
+        or cmz_title
+        or galactic_center_gas
+        or interstellar_magnetic
+        or explicit_hi_title
+    )
 
 
-def apply_final_scope_guard(scored: list[dict], summary: dict) -> tuple[list[dict], dict]:
+def apply_final_scope_guard(
+    scored: list[dict], summary: dict
+) -> tuple[list[dict], dict]:
     """Undo any overbroad scope rescue before report/email generation."""
     for p in scored:
         reason = str(p.get("scope_reason", ""))
@@ -149,10 +169,15 @@ def apply_final_scope_guard(scored: list[dict], summary: dict) -> tuple[list[dic
         if reason.startswith("scope rescue") and previous in {"SKIP", "C"}:
             if not _true_galactic_ism_rescue(p):
                 p["priority"] = previous
-                p["scope_reason"] = "final scope guard reverted an overbroad Galactic-center rescue"
+                p["scope_reason"] = (
+                    "final scope guard reverted an overbroad Galactic-center rescue"
+                )
 
     scored.sort(
-        key=lambda p: ({"SKIP": 0, "C": 1, "B": 2, "A": 3}[p["priority"]], float(p.get("score", 0.0))),
+        key=lambda p: (
+            {"SKIP": 0, "C": 1, "B": 2, "A": 3}[p["priority"]],
+            float(p.get("score", 0.0)),
+        ),
         reverse=True,
     )
     summary = dict(summary)
@@ -164,28 +189,32 @@ def apply_final_scope_guard(scored: list[dict], summary: dict) -> tuple[list[dic
 def paper_block(p: dict) -> str:
     authors = ", ".join(p.get("authors", []))
     top_topics = ", ".join(p.get("top_topics", [])[:3])
-    return "\n".join([
-        f"#### [{p['priority']}] {p['title']}",
-        f"- **Score:** {p['score']:.1f}  ",
-        f"- **Topics:** {top_topics}  ",
-        f"- **Authors:** {authors}  ",
-        f"- **Subjects:** {p.get('subjects', '')}  ",
-        f"- **ArXiv:** [{p['main_page']}]({p['main_page']})  ",
-        f"- **PDF:** [{p['pdf']}]({p['pdf']})  ",
-        f"- **Abstract:** {p['abstract']}",
-        "",
-    ])
+    return "\n".join(
+        [
+            f"#### [{p['priority']}] {p['title']}",
+            f"- **Score:** {p['score']:.1f}  ",
+            f"- **Topics:** {top_topics}  ",
+            f"- **Authors:** {authors}  ",
+            f"- **Subjects:** {p.get('subjects', '')}  ",
+            f"- **arXiv:** [{p['main_page']}]({p['main_page']})  ",
+            f"- **PDF:** [{p['pdf']}]({p['pdf']})  ",
+            f"- **Abstract:** {p['abstract']}",
+            "",
+        ]
+    )
 
 
-def build_reports(issue_title: str, scored: list[dict], summary: dict) -> tuple[str, str]:
+def build_reports(
+    issue_title: str, scored: list[dict], summary: dict
+) -> tuple[str, str]:
     selected = [p for p in scored if p["priority"] in {"A", "B"}]
     boundary = [p for p in scored if p["priority"] == "C"]
     date = dt.date.today().isoformat()
 
     header = [
-        f"# {issue_title}",
+        f"# AstroBrief — {issue_title}",
         "",
-        "Free semantic ISM / star-formation screening: **SPECTER2 + local zero-shot NLI**.",
+        "Semantic ISM / star-formation screening: **SPECTER2 + domain evidence + local zero-shot NLI**.",
         "No paid model API is used.",
         "",
         f"### Today: {len(selected)} recommended papers",
@@ -200,16 +229,18 @@ def build_reports(issue_title: str, scored: list[dict], summary: dict) -> tuple[
 
     selected_text = "\n".join(paper_block(p) for p in selected)
     email_report = "\n".join(header) + selected_text
-    email_report += f"\n\nGenerated {date}.\n"
+    email_report += f"\n\nGenerated by AstroBrief on {date}.\n"
 
     full_report = email_report
     full_report += "\n\n### Boundary candidates (C; not emailed as recommendations)\n\n"
     if boundary:
         for p in boundary:
-            full_report += f"- **{p['title']}** — `{p.get('best_positive_topic')}` — [{p['id']}]({p['main_page']})\n"
+            full_report += (
+                f"- **{p['title']}** — `{p.get('best_positive_topic')}` — "
+                f"[{p['id']}]({p['main_page']})\n"
+            )
     else:
         full_report += "- None\n"
-    full_report += "\n\nby Al.Zn (Xin Lyu).\n"
     return full_report, email_report
 
 
@@ -234,14 +265,18 @@ def send_email(markdown_text: str, n_selected: int) -> None:
     </style></head><body>{html_body}</body></html>"""
 
     msg = EmailMessage()
-    msg["Subject"] = f"arXiv ISM Daily · {dt.date.today().isoformat()} · {n_selected} papers"
+    msg["Subject"] = (
+        f"AstroBrief · {dt.date.today().isoformat()} · {n_selected} papers"
+    )
     msg["From"] = sender
     msg["To"] = recipients
     msg.set_content(markdown_text)
     msg.add_alternative(html, subtype="html")
 
     if port == 465:
-        with smtplib.SMTP_SSL(host, port, context=ssl.create_default_context()) as smtp:
+        with smtplib.SMTP_SSL(
+            host, port, context=ssl.create_default_context()
+        ) as smtp:
             smtp.login(user, pwd)
             smtp.send_message(msg)
     else:
@@ -251,40 +286,3 @@ def send_email(markdown_text: str, n_selected: int) -> None:
             smtp.login(user, pwd)
             smtp.send_message(msg)
     print("[OK] Mail sent to", recipients)
-
-
-def main(token: str) -> None:
-    issue_title, papers = fetch_daily_papers()
-    scored, summary = score_papers(papers)
-    scored, summary = apply_final_scope_guard(scored, summary)
-    selected = [p for p in scored if p["priority"] in {"A", "B"}]
-    full_report, email_report = build_reports(issue_title, scored, summary)
-
-    date = dt.date.today().isoformat()
-    notice_dir = pathlib.Path("Arxiv_Daily_Notice")
-    score_dir = pathlib.Path("semantic_results")
-    notice_dir.mkdir(exist_ok=True)
-    score_dir.mkdir(exist_ok=True)
-    notice_path = notice_dir / f"{date}-Arxiv-Daily-Paper.md"
-    notice_path.write_text(full_report, encoding="utf-8")
-    pathlib.Path("README.md").write_text(full_report, encoding="utf-8")
-    (score_dir / f"{date}-scores.json").write_text(
-        json.dumps({"summary": summary, "papers": scored}, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-
-    send_email(email_report, len(selected))
-    make_github_issue(
-        title=f"{issue_title} · semantic ISM",
-        body=full_report,
-        labels=None,
-        TOKEN=token,
-    )
-    print("[SUMMARY]", json.dumps(summary, ensure_ascii=False))
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--token", required=True)
-    args = parser.parse_args()
-    main(args.token)
