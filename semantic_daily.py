@@ -30,8 +30,27 @@ def _extract_categories(subjects: str) -> list[str]:
     return categories
 
 
+def _daily_submission_lists(content) -> list:
+    """Return New submissions + Cross-lists, explicitly excluding Replacements.
+
+    arXiv's /new page is sectioned into multiple <dl> blocks. The legacy code
+    read only the first block; semantic production keeps the new-submission and
+    cross-list blocks so relevant HE/IM/other-primary papers are not silently
+    missed. If arXiv changes headings, fall back conservatively to the first dl.
+    """
+    selected = []
+    for dl in content.find_all("dl"):
+        heading = dl.find_previous("h3")
+        heading_text = heading.get_text(" ", strip=True).lower() if heading else ""
+        if "new submission" in heading_text or "cross-list" in heading_text or "cross list" in heading_text:
+            selected.append(dl)
+    if not selected and content.dl is not None:
+        selected = [content.dl]
+    return selected
+
+
 def fetch_daily_papers() -> tuple[str, list[dict]]:
-    """Read the official astro-ph new-list page, but do not keyword-filter it."""
+    """Read new + cross-listed astro-ph papers without keyword prefiltering."""
     headers = {"User-Agent": "ArXivDaily-ISM/2.0 (+https://github.com/alznlyux/ArXivDaily_StarFormation)"}
     response = requests.get(NEW_SUB_URL, headers=headers, timeout=120)
     response.raise_for_status()
@@ -41,44 +60,52 @@ def fetch_daily_papers() -> tuple[str, list[dict]]:
         raise RuntimeError("Could not parse the arXiv new-list page")
 
     issue_title = content.find("h3").get_text(" ", strip=True)
-    dt_list = content.dl.find_all("dt")
-    dd_list = content.dl.find_all("dd")
-    if len(dt_list) != len(dd_list):
-        raise RuntimeError("arXiv listing dt/dd lengths differ")
-
+    listing_dls = _daily_submission_lists(content)
     papers = []
-    for dtnode, ddnode in zip(dt_list, dd_list):
-        a_abs = dtnode.find("a", title="Abstract")
-        title_node = ddnode.find("div", {"class": "list-title mathjax"})
-        authors_node = ddnode.find("div", {"class": "list-authors"})
-        subjects_node = ddnode.find("div", {"class": "list-subjects"})
-        abstract_node = ddnode.find("p", {"class": "mathjax"})
-        if not all([a_abs, title_node, authors_node, subjects_node, abstract_node]):
-            continue
+    seen_ids = set()
 
-        paper_id = a_abs["href"].rstrip("/").split("/")[-1]
-        title = title_node.get_text(" ", strip=True).replace("Title:", "", 1).strip()
-        authors_text = authors_node.get_text(" ", strip=True).replace("Authors:", "", 1).strip()
-        subjects = subjects_node.get_text(" ", strip=True).replace("Subjects:", "", 1).strip()
-        abstract = re.sub(r"\s+", " ", abstract_node.get_text(" ", strip=True)).strip()
-        categories = _extract_categories(subjects)
-        astro_categories = [c for c in categories if c.startswith("astro-ph.")]
-        primary = categories[0] if categories else (astro_categories[0] if astro_categories else "")
+    for dl in listing_dls:
+        dt_list = dl.find_all("dt")
+        dd_list = dl.find_all("dd")
+        if len(dt_list) != len(dd_list):
+            raise RuntimeError("arXiv listing dt/dd lengths differ")
 
-        papers.append({
-            "id": paper_id,
-            "title": title,
-            "authors": [x.strip() for x in authors_text.split(",") if x.strip()],
-            "subjects": subjects,
-            "categories": categories,
-            "primary_category": primary,
-            "abstract": abstract,
-            "main_page": f"https://arxiv.org/abs/{paper_id}",
-            "pdf": f"https://arxiv.org/pdf/{paper_id}.pdf",
-        })
+        for dtnode, ddnode in zip(dt_list, dd_list):
+            a_abs = dtnode.find("a", title="Abstract")
+            title_node = ddnode.find("div", {"class": "list-title mathjax"})
+            authors_node = ddnode.find("div", {"class": "list-authors"})
+            subjects_node = ddnode.find("div", {"class": "list-subjects"})
+            abstract_node = ddnode.find("p", {"class": "mathjax"})
+            if not all([a_abs, title_node, authors_node, subjects_node, abstract_node]):
+                continue
+
+            paper_id = a_abs["href"].rstrip("/").split("/")[-1]
+            if paper_id in seen_ids:
+                continue
+            seen_ids.add(paper_id)
+
+            title = title_node.get_text(" ", strip=True).replace("Title:", "", 1).strip()
+            authors_text = authors_node.get_text(" ", strip=True).replace("Authors:", "", 1).strip()
+            subjects = subjects_node.get_text(" ", strip=True).replace("Subjects:", "", 1).strip()
+            abstract = re.sub(r"\s+", " ", abstract_node.get_text(" ", strip=True)).strip()
+            categories = _extract_categories(subjects)
+            astro_categories = [c for c in categories if c.startswith("astro-ph.")]
+            primary = categories[0] if categories else (astro_categories[0] if astro_categories else "")
+
+            papers.append({
+                "id": paper_id,
+                "title": title,
+                "authors": [x.strip() for x in authors_text.split(",") if x.strip()],
+                "subjects": subjects,
+                "categories": categories,
+                "primary_category": primary,
+                "abstract": abstract,
+                "main_page": f"https://arxiv.org/abs/{paper_id}",
+                "pdf": f"https://arxiv.org/pdf/{paper_id}.pdf",
+            })
     if not papers:
         raise RuntimeError("No papers parsed from astro-ph/new")
-    print(f"[INFO] Parsed {len(papers)} papers from astro-ph/new")
+    print(f"[INFO] Parsed {len(papers)} new/cross-listed papers from astro-ph/new")
     return issue_title, papers
 
 
@@ -109,12 +136,7 @@ def _true_galactic_ism_rescue(p: dict) -> bool:
 
 
 def apply_final_scope_guard(scored: list[dict], summary: dict) -> tuple[list[dict], dict]:
-    """Undo any overbroad scope rescue before report/email generation.
-
-    The core semantic model is deliberately broad. The final production guard
-    prevents stellar-dynamics papers near the Galactic Center from being rescued
-    merely because their abstracts also mention star formation.
-    """
+    """Undo any overbroad scope rescue before report/email generation."""
     for p in scored:
         reason = str(p.get("scope_reason", ""))
         previous = p.get("pre_scope_priority")
