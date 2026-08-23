@@ -6,6 +6,7 @@ on:
     paths:
       - 'semantic_*.py'
       - 'semantic_topics.json'
+      - 'github_issue.py'
       - 'requirements.txt'
       - '.github/workflows/semantic_production_test.yml'
   pull_request:
@@ -13,6 +14,7 @@ on:
     paths:
       - 'semantic_*.py'
       - 'semantic_topics.json'
+      - 'github_issue.py'
       - 'requirements.txt'
       - '.github/workflows/daily_arxiv.yml'
       - '.github/workflows/semantic_production_test.yml'
@@ -43,7 +45,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Compile production code
-        run: python -m py_compile semantic_daily.py semantic_recommender.py semantic_smoke_test.py
+        run: python -m py_compile semantic_daily.py semantic_recommender.py semantic_smoke_test.py github_issue.py
 
       - name: Run semantic smoke test
         run: python semantic_smoke_test.py
