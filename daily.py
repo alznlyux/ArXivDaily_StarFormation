@@ -1,5 +1,5 @@
 # coding: utf-8
-"""Standalone daily entry point for the semantic arXiv recommender."""
+"""Standalone production entry point for AstroBrief."""
 from __future__ import annotations
 
 import argparse
@@ -25,23 +25,21 @@ def main(token: str) -> None:
     full_report, email_report = build_reports(issue_title, scored, summary)
 
     run_date = dt.date.today().isoformat()
-    notice_dir = pathlib.Path("Arxiv_Daily_Notice")
-    score_dir = pathlib.Path("semantic_results")
-    notice_dir.mkdir(exist_ok=True)
+    brief_dir = pathlib.Path("briefs")
+    score_dir = pathlib.Path("scores")
+    brief_dir.mkdir(exist_ok=True)
     score_dir.mkdir(exist_ok=True)
 
-    (notice_dir / f"{run_date}-Arxiv-Daily-Paper.md").write_text(
-        full_report, encoding="utf-8"
-    )
+    (brief_dir / f"{run_date}.md").write_text(full_report, encoding="utf-8")
     pathlib.Path("LATEST.md").write_text(full_report, encoding="utf-8")
-    (score_dir / f"{run_date}-scores.json").write_text(
+    (score_dir / f"{run_date}.json").write_text(
         json.dumps({"summary": summary, "papers": scored}, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 
     send_email(email_report, len(selected))
     make_github_issue(
-        title=f"{issue_title} · semantic ISM",
+        title=f"AstroBrief · {issue_title}",
         body=full_report,
         labels=None,
         TOKEN=token,
@@ -50,7 +48,7 @@ def main(token: str) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Run AstroBrief once")
     parser.add_argument("-t", "--token", default="")
     args = parser.parse_args()
     main(args.token)
