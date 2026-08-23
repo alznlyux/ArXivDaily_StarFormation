@@ -1,33 +1,50 @@
-# encoding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+# coding: utf-8
+"""Small GitHub Issues helper used by the daily workflow."""
+from __future__ import annotations
+
+import os
 
 import requests
-from config import USERNAME, REPO_OWNER, REPO_NAME
 
 
-def make_github_issue(title, body=None, assignee=USERNAME, closed=False, labels=None, TOKEN="TOKEN_needed"):
-    """Create a GitHub issue without making issue failures fatal to email delivery.
+def _repository() -> tuple[str, str]:
+    """Resolve owner/repository from GitHub Actions or explicit environment variables."""
+    full_name = os.environ.get("GITHUB_REPOSITORY", "").strip()
+    if "/" in full_name:
+        owner, repo = full_name.split("/", 1)
+        return owner, repo
 
-    The workflow passes GitHub Actions' built-in GITHUB_TOKEN, so no personal
-    access token needs to be stored or rotated for this repository. Network/API
-    failures are logged and returned as False rather than raised: the daily
-    email is the primary delivery channel and must not be duplicated by the
-    semantic workflow's legacy fallback merely because issue creation failed.
-    """
-    url = "https://api.github.com/repos/{}/{}/issues".format(REPO_OWNER, REPO_NAME)
+    owner = os.environ.get("ARXIV_DAILY_REPO_OWNER", "").strip()
+    repo = os.environ.get("ARXIV_DAILY_REPO_NAME", "").strip()
+    if owner and repo:
+        return owner, repo
+    raise RuntimeError(
+        "Repository is not configured. Run inside GitHub Actions or set "
+        "ARXIV_DAILY_REPO_OWNER and ARXIV_DAILY_REPO_NAME."
+    )
+
+
+def make_github_issue(
+    title: str,
+    body: str | None = None,
+    assignee: str | None = None,
+    closed: bool = False,
+    labels: list[str] | None = None,
+    TOKEN: str = "",
+) -> bool:
+    """Create an issue without making issue failures fatal to email delivery."""
+    if not TOKEN:
+        print("[WARN] GitHub token is unavailable; skip issue creation")
+        return False
+
+    owner, repo = _repository()
+    url = f"https://api.github.com/repos/{owner}/{repo}/issues"
     headers = {
-        "Authorization": "Bearer {}".format(TOKEN),
+        "Authorization": f"Bearer {TOKEN}",
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
-
-    data = {
-        "title": title,
-        "body": body or "",
-    }
+    data: dict[str, object] = {"title": title, "body": body or ""}
     if assignee:
         data["assignees"] = [assignee]
     if labels:
@@ -35,9 +52,6 @@ def make_github_issue(title, body=None, assignee=USERNAME, closed=False, labels=
 
     try:
         response = requests.post(url, json=data, headers=headers, timeout=30)
-
-        # Some historical keyword labels may not exist in the repository. If
-        # GitHub rejects metadata, retry once with only title/body.
         if response.status_code == 422 and ("labels" in data or "assignees" in data):
             response = requests.post(
                 url,
@@ -46,25 +60,16 @@ def make_github_issue(title, body=None, assignee=USERNAME, closed=False, labels=
                 timeout=30,
             )
     except requests.RequestException as exc:
-        print('Could not create Issue "{}": {}'.format(title, exc))
+        print(f'[WARN] Could not create issue "{title}": {exc}')
         return False
 
     if response.status_code == 201:
-        print('Successfully created Issue "{}"'.format(title))
-        print(response.status_code)
+        print(f'[OK] Created issue "{title}"')
+        if closed:
+            issue_url = response.json().get("url")
+            if issue_url:
+                requests.patch(issue_url, json={"state": "closed"}, headers=headers, timeout=30)
         return True
 
-    print('Could not create Issue "{}"'.format(title))
-    print("Response:", response.text)
-    print(response.status_code)
+    print(f'[WARN] Could not create issue "{title}": {response.status_code} {response.text}')
     return False
-
-
-if __name__ == '__main__':
-    make_github_issue(
-        title='Pretty title',
-        body='Beautiful body',
-        assignee=USERNAME,
-        closed=False,
-        labels=["imagenet", "image retrieval"],
-    )
