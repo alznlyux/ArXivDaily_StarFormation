@@ -1,0 +1,94 @@
+name: ISM Literature Recommender v2 Experiment
+
+on:
+  push:
+    branches: [v2-experiment]
+    paths:
+      - 'v2/**'
+      - '.github/workflows/v2_experiment.yml'
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Recent astro-ph lookback window in days'
+        required: false
+        default: '10'
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Restore semantic-model cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/huggingface
+          key: ism-semantic-models-${{ runner.os }}-v1
+          restore-keys: |
+            ism-semantic-models-${{ runner.os }}-
+            specter2-${{ runner.os }}-
+
+      - name: Install experiment dependencies
+        run: pip install -r v2/requirements-v2.txt
+
+      - name: Run domain-gated SPECTER2 v2.2 experiment
+        id: domain_gated
+        continue-on-error: true
+        env:
+          DAYS: ${{ inputs.days || '10' }}
+        run: |
+          mkdir -p v2_results
+          set +e
+          python v2/v2_domain_gated.py --days "$DAYS" --output-dir v2_results 2>&1 | tee v2_results/domain-gated-run.log
+          status=${PIPESTATUS[0]}
+          echo "$status" > v2_results/domain-gated-exit-code.txt
+          exit "$status"
+
+      - name: Run conservative zero-shot NLI v2.5 reranker
+        id: nli
+        if: steps.domain_gated.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set +e
+          python v2/v2_nli_rerank.py --output-dir v2_results 2>&1 | tee v2_results/nli-run.log
+          status=${PIPESTATUS[0]}
+          echo "$status" > v2_results/nli-exit-code.txt
+          exit "$status"
+
+      - name: Apply stable group-scope calibration v2.6
+        id: scope
+        if: steps.nli.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set +e
+          python v2/v2_scope_calibrate.py --output-dir v2_results 2>&1 | tee v2_results/scope-run.log
+          status=${PIPESTATUS[0]}
+          echo "$status" > v2_results/scope-exit-code.txt
+          exit "$status"
+
+      - name: Commit experiment results and diagnostics
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- v2_results/
+          if git diff --cached --quiet; then
+            echo "No experiment output changes."
+          else
+            git commit -m "Update v2.6 calibrated ISM recommender experiment"
+            git push
+          fi
+
+      - name: Fail job if experiment failed
+        if: steps.domain_gated.outcome == 'failure' || steps.nli.outcome == 'failure' || steps.scope.outcome == 'failure'
+        run: exit 1
